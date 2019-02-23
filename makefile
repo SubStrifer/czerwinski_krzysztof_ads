@@ -12,7 +12,7 @@ OBJ_DIR=sourcecode\obj
 # Exectuable directory
 BIN_DIR=executable
 # Include directory
-INC=sourcecode\include
+INC_DIR=sourcecode\include
 
 # Executable
 EXE=game.exe
@@ -24,7 +24,7 @@ make_exe : $(EXE)
 
 # Compile each .c file to its respective .obj file
 {$(SRC_DIR)}.c{$(OBJ_DIR)}.obj :
-	$(CC) $(CFLAGS) /Fo$(OBJ_DIR)\ /I$(INC)\ $<
+	$(CC) $(CFLAGS) /Fo$(OBJ_DIR)\ /I$(INC_DIR)\ $<
 
 # Link the files into an executable
 $(EXE): $(OBJ_DIR)\*.obj
@@ -38,4 +38,4 @@ create_dirs :
 # Clean output directories
 clean :
 	@if exist $(BIN_DIR)\$(EXE) del $(BIN_DIR)\$(EXE)
-	@if exist $(OBJ_DIR) rmdir /S /Q $(OBJ_DIR)
+	@if exist $(OBJ_DIR)\*.obj del $(OBJ_DIR)\*.obj
