@@ -2,10 +2,11 @@
 #include "..\include\input.h"
 
 // Returns key code for navigation keys (arrows and enter) or -1 if other key was pressed
-int getNavKey()
+int get_nav_key()
 {
+	int key = getch();
 	// Returning arrow keys
-	if (getch() == KEY_ARROW) 
+	if (key == KEY_ARROW)
 	{
 		switch (getch()) 
 		{
@@ -27,14 +28,17 @@ int getNavKey()
 		}
 	}
 	// Returning enter
-	if (getch() == KEY_ENTER)
+	if (key == KEY_ENTER)
 		return KEY_ENTER;
+	// Returning escape
+	if (key == KEY_ESC)
+		return KEY_ESC;
 	// Returning -1 for everything else
 	return -1;
 }
 
 // Testing - displaying key codes until Escape is pressed
-void displayKeyCodes()
+void display_key_codes()
 {
 	int c = 0;
 	while (c != KEY_ESC)

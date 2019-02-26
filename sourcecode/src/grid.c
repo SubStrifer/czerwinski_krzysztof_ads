@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "../include/grid.h"
 
-grid_t* newGrid(int width, int height)
+// Allocates and returns a new grid
+grid_t* grid_new(int width, int height)
 {
 	grid_t* grid = (grid_t*)malloc(sizeof(grid_t));
 	grid->width = width;
@@ -17,10 +18,18 @@ grid_t* newGrid(int width, int height)
 	return grid;
 }
 
-cell_t* getCell(grid_t* grid, int x, int y)
+// Removes a grid from memory
+void grid_free(grid_t* grid)
+{
+	free(grid->cells);
+	free(grid);
+}
+
+// Returns a pointer to a specific cell in a grid
+cell_t* grid_cell(grid_t* grid, int x, int y)
 {
 	// Returning NULL if coords are incorrect
-	if (x >= grid->width || y >= grid->height)
+	if (x >= grid->width || y >= grid->height || x < 0 || y < 0)
 		return NULL;
 
 	return &grid->cells[y * grid->width + x];

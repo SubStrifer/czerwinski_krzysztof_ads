@@ -17,10 +17,18 @@ INC_DIR=sourcecode\include
 # Executable
 EXE=game.exe
 
+# All
 all : clean create_dirs make_exe
+
+# All + run executable immediately
+run : clean create_dirs make_exe run_exe
 
 # Link the object files into a binary
 make_exe : $(EXE)
+
+# Open created executable
+run_exe :
+	@if exist $(BIN_DIR)\$(EXE) $(BIN_DIR)\$(EXE)
 
 # Compile each .c file to its respective .obj file
 {$(SRC_DIR)}.c{$(OBJ_DIR)}.obj :

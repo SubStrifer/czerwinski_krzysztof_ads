@@ -8,6 +8,5 @@
 #define KEY_ENTER 0x0D
 #define KEY_ESC 0x1B
 
-int getNavKey();
-
-void displayKeyCodes();
+int get_nav_key();
+void display_key_codes();
