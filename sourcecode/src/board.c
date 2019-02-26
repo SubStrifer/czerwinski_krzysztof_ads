@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "..\include\board.h"
 #include "..\include\input.h"
+#include "..\include\ai.h"
 
 void board_switch_player(board_t*);
 bool board_place_piece(board_t*);
@@ -85,7 +86,7 @@ void board_play(board_t* board)
 		// Warning about cell being occupied
 		bool warning = false;
 		// Human player
-		if (board->current_player->ai == false)
+		if (board->current_player->ai == NULL)
 		{
 			nav_key = get_nav_key();
 			// Handling navigation
@@ -115,6 +116,18 @@ void board_play(board_t* board)
 				break;
 			}
 		}
+		else// AI player
+		{
+			ai_calculate(board->current_player->ai);
+			board->pointer_x = board->current_player->ai->pointer_x;
+			board->pointer_y = board->current_player->ai->pointer_y;
+			// Placing a piece
+			if (board_place_piece(board))
+				// Switching player if piece has been placed
+				board_switch_player(board);
+			else
+				warning = true;
+		}
 		// Clearing terminal
 		system("cls");
 		// Checking if somebody wins
@@ -136,8 +149,12 @@ void board_play(board_t* board)
 			printf("It's a tie!\n");
 			return;
 		default:
+			// Check if the next player is AI
+			if(board->current_player->ai == NULL)
 			// Redrawing the board
-			board_draw(board, true);
+				board_draw(board, true);
+			else
+				board_draw(board, false);
 			break;
 		}
 		// Drawing board information
@@ -251,6 +268,21 @@ int board_check_win(board_t* board)
 						if (x + i >= board->grid->width || y + i >= board->grid->height)
 							break;
 						if (grid_cell(board->grid, x + i, y + i)->value == player)
+							consecutive++;
+						else
+							break;
+					}
+					// Player wins
+					if (consecutive == board->win_cond)
+						return player;
+					else
+						consecutive = 1;
+					// Checking second diagonal
+					for (int i = 1; i < board->win_cond; i++)
+					{
+						if (x - i < 0 || y + i >= board->grid->height)
+							break;
+						if (grid_cell(board->grid, x - i, y + i)->value == player)
 							consecutive++;
 						else
 							break;

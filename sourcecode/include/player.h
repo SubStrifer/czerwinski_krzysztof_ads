@@ -1,11 +1,13 @@
 #pragma once
 #include <stdbool.h>
+#include "..\include\ai.h"
 
+// Represents a player
 typedef struct
 {
 	char name[20];
 	char piece;
-	bool ai;
+	ai_t* ai;
 } player_t;
 
 player_t* player_new(char*, char, bool);

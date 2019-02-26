@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include "../include/menu.h"
-#include "../include/game.h"
+#include "..\include\menu.h"
+#include "..\include\game.h"
+#include "..\include\input.h"
 
 #define OPTIONS_COUNT 5
 

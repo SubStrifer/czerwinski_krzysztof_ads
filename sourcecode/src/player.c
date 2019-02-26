@@ -8,7 +8,15 @@ player_t* player_new(char* name, char piece, bool ai)
 	
 	strcpy(player->name, name);
 	player->piece = piece;
-	player->ai = ai;
+	// If this is an AI player create a new ai
+	if (ai)
+	{
+		player->ai = ai_new();
+	}
+	else
+	{
+		player->ai = NULL;
+	}
 
 	return player;
 }
