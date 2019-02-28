@@ -1,5 +1,7 @@
+#include <time.h>
 #include "..\include\ai.h"
 #include "..\include\game.h"
+#include "..\include\list.h"
 
 int count_process(int);
 void ai_weights(ai_t*);
@@ -44,6 +46,7 @@ int count_process(int count)
 		default:
 			return 0;
 	}
+	return count;
 }
 
 // Calculates the best move and sets ai pointer to it
@@ -79,15 +82,6 @@ void ai_calculate(ai_t* ai)
 	// Check both players
 	for (int player = 1; player < 3; player++)
 	{
-		// Should break the count
-		bool b = true;
-		// Setting weights multiplier
-		int multiplier = 0;
-		if (player == ai_id)
-			multiplier = 1;
-		else
-			multiplier = 1;
-
 		// Setting other player id
 		int other_player;
 		if (player == 1)
@@ -99,26 +93,19 @@ void ai_calculate(ai_t* ai)
 		{
 			for (int x = 0; x < width; x++)
 			{
-				// Holds values for future weights
-				int values[5][9];
-				for (int j = 0; j < 5; j++)
-				{
-					for (int i = 0; i < 9; i++)
-					{
-						values[j][i] = 0;
-					}
-				}
 				int count = 0;
 
 				// Checking horizontal
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
+					// If coordinates are out of bounds
 					if (x + i >= width)
 						break;
+					// If in the current cell is the player that it's being checked now
 					if (grid_cell(game_grid, x + i, y)->value == player)
-						count += (6 - game_board->win_cond) * multiplier;
+						count += (6 - game_board->win_cond);
 					// If there's other player on the way - break
-					else if (grid_cell(game_grid, x + i, y)->value == other_player && b)
+					else if (grid_cell(game_grid, x + i, y)->value == other_player)
 					{						
 						count = 0;
 						break;						
@@ -129,192 +116,149 @@ void ai_calculate(ai_t* ai)
 				{
 					if (x + i >= width)
 						break;
-					// Add weights to cells
+					// Add weights to structures
 					if(grid_cell(ai->weights_temp, x + i, y)->value < count_process(count))
 						grid_cell(ai->weights_temp, x + i, y)->value = count_process(count);
-						//grid_cell(ai->weights, x + i, y)->value += count;
 				}
 				count = 0;
 
 				// Checking -horizontal
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x - i < 0)
-						break;
+					if (x - i < 0) break;
 					if (grid_cell(game_grid, x - i, y)->value == player)
-						count += (6 - game_board->win_cond) * multiplier;
-					// If there's other player on the way - break
-					else if (grid_cell(game_grid, x - i, y)->value == other_player && b)
+						count += (6 - game_board->win_cond);
+					else if (grid_cell(game_grid, x - i, y)->value == other_player)
 					{
 						count = 0;
 						break;
 					}
 				}
-				// Adding weights
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x - i < 0)
-						break;
-					// Add weights to cells
+					if (x - i < 0) break;
 					if (grid_cell(ai->weights_temp, x - i, y)->value < count_process(count))
 						grid_cell(ai->weights_temp, x - i, y)->value = count_process(count);
-						//grid_cell(ai->weights, x - i, y)->value += count;
 				}
 				count = 0;
 
 				// Checking vertical
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (y + i >= height)
-						break;
+					if (y + i >= height) break;
 					if (grid_cell(game_grid, x, y + i)->value == player)
-						count += (6 - game_board->win_cond) * multiplier;
-					// If there's other player on the way - break
-					else if (grid_cell(game_grid, x, y + i)->value == other_player && b)
+						count += (6 - game_board->win_cond);
+					else if (grid_cell(game_grid, x, y + i)->value == other_player)
 					{
 						count = 0;
 						break;
 					}
 				}
-				// Adding weights
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (y + i >= height)
-						break;
-					// Add weights to cells
+					if (y + i >= height) break;
 					if (grid_cell(ai->weights_temp, x, y + i)->value < count_process(count))
 						grid_cell(ai->weights_temp, x, y + i)->value = count_process(count);
-						//grid_cell(ai->weights, x, y + i)->value += count;
 				}
 				count = 0;
 
 				// Checking -vertical
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (y - i < 0)
-						break;
+					if (y - i < 0) break;
 					if (grid_cell(game_grid, x, y - i)->value == player)
-						count += (6 - game_board->win_cond) * multiplier;
-					// If there's other player on the way - break
-					else if (grid_cell(game_grid, x, y - i)->value == other_player && b)
+						count += (6 - game_board->win_cond);
+					else if (grid_cell(game_grid, x, y - i)->value == other_player)
 					{
 						count = 0;
 						break;
 					}
 				}
-				// Adding weights
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (y - i < 0)
-						break;
-					// Add weights to cells
+					if (y - i < 0) break;
 					if (grid_cell(ai->weights_temp, x, y - i)->value < count_process(count))
 						grid_cell(ai->weights_temp, x, y - i)->value = count_process(count);
-						//grid_cell(ai->weights, x, y - i)->value += count;
 				}
 				count = 0;
 
 				// Checking 1. diagonal
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x + i >= width || y + i >= height)
-						break;
+					if (x + i >= width || y + i >= height) break;
 					if (grid_cell(game_grid, x + i, y + i)->value == player)
-						count += (6 - game_board->win_cond) * multiplier;
-					// If there's other player on the way - break
-					else if (grid_cell(game_grid, x + i, y + i)->value == other_player && b)
+						count += (6 - game_board->win_cond);
+					else if (grid_cell(game_grid, x + i, y + i)->value == other_player)
 					{
 						count = 0;
 						break;
 					}
 				}
-				// Adding weights
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x + i >= width || y + i >= height)
-						break;
-					// Add weights to cells
+					if (x + i >= width || y + i >= height) break;
 					if (grid_cell(ai->weights_temp, x + i, y + i)->value < count_process(count))
 						grid_cell(ai->weights_temp, x + i, y + i)->value = count_process(count);
-						//grid_cell(ai->weights, x + i, y + i)->value += count;
 				}
 				count = 0;
 
 				// Checking 2.  diagonal
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x - i < 0 || y + i >= height)
-						break;
+					if (x - i < 0 || y + i >= height) break;
 					if (grid_cell(game_grid, x - i, y + i)->value == player)
-						count += (6 - game_board->win_cond) * multiplier;
-					// If there's other player on the way - break
-					else if (grid_cell(game_grid, x - i, y + i)->value == other_player && b)
+						count += (6 - game_board->win_cond);
+					else if (grid_cell(game_grid, x - i, y + i)->value == other_player)
 					{
 						count = 0;
 						break;
 					}
 				}
-				// Adding weights
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x - i < 0 || y + i >= height)
-						break;
-					// Add weights to cells
+					if (x - i < 0 || y + i >= height) break;
 					if (grid_cell(ai->weights_temp, x - i, y + i)->value < count_process(count))
 						grid_cell(ai->weights_temp, x - i, y + i)->value = count_process(count);
-						//grid_cell(ai->weights, x - i, y + i)->value += count;
 				}
 				count = 0;
 
 				// Checking 3. diagonal
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x + i >= width || y - i < 0)
-						break;
+					if (x + i >= width || y - i < 0) break;
 					if (grid_cell(game_grid, x + i, y - i)->value == player)
-						count += (6 - game_board->win_cond) * multiplier;
-					// If there's other player on the way - break
-					else if (grid_cell(game_grid, x + i, y - i)->value == other_player && b)
+						count += (6 - game_board->win_cond);
+					else if (grid_cell(game_grid, x + i, y - i)->value == other_player)
 					{
 						count = 0;
 						break;
 					}
 				}
-				// Adding weights
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x + i >= width || y - i < 0)
-						break;
-					// Add weights to cells
+					if (x + i >= width || y - i < 0) break;
 					if (grid_cell(ai->weights_temp, x + i, y - i)->value < count_process(count))
 						grid_cell(ai->weights_temp, x + i, y - i)->value = count_process(count);
-						//grid_cell(ai->weights, x + i, y - i)->value += count;
 				}
 				count = 0;
 
 				// Checking 4. diagonal
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x - i < 0 || y - i < 0)
-						break;
+					if (x - i < 0 || y - i < 0) break;
 					if (grid_cell(game_grid, x - i, y - i)->value == player)
-						count += (6 - game_board->win_cond) * multiplier;
-					// If there's other player on the way - break
-					else if (grid_cell(game_grid, x - i, y - i)->value == other_player && b)
+						count += (6 - game_board->win_cond);
+					else if (grid_cell(game_grid, x - i, y - i)->value == other_player)
 					{
 						count = 0;
 						break;
 					}
 				}
-				// Adding weights
 				for (int i = 0; i < game_board->win_cond; i++)
 				{
-					if (x - i < 0 || y - i < 0)
-						break;
-					// Add weights to cells
+					if (x - i < 0 || y - i < 0) break;
 					if (grid_cell(ai->weights_temp, x - i, y - i)->value < count_process(count))
 						grid_cell(ai->weights_temp, x - i, y - i)->value = count_process(count);
-						//grid_cell(ai->weights, x - i, y - i)->value += count;
 				}
 				count = 0;
 			}
@@ -327,16 +271,13 @@ void ai_calculate(ai_t* ai)
 	{
 		for (int x = 0; x < width; x++)
 		{
-			//grid_cell(ai->weights, x, y)->value = grid_cell(ai->weights_temp, x, y)->value;
-			//ai_neighbours(ai->weights_temp, ai->weights, x, y);
-
 			int multiplier = 1;
 
 			// Setting multiplier for weights
 			if(grid_cell(game_grid, x, y)->value == ai_id)
-				multiplier = 1;
+				multiplier = 1;// prevent to lose weight
 			else if (grid_cell(game_grid, x, y)->value == enemy_id)
-				multiplier = 1;
+				multiplier = 2;// strive to win weight
 			else
 				continue;
 			
@@ -357,7 +298,7 @@ void ai_calculate(ai_t* ai)
 		}
 	}
 
-	// Draw weights
+	// Display weights
 	//ai_weights(ai);
 
 	// Iterating again and searching for the best weight
@@ -373,13 +314,32 @@ void ai_calculate(ai_t* ai)
 			if (new_weight > best_weight && grid_cell(game_board->grid, x, y)->value == 0)
 			{
 				best_weight = new_weight;
-				ai->pointer_x = x;
-				ai->pointer_y = y;
 			}
 
 		}
 	}
 
+	// Adding all cells with the best weight
+	list_2_t* cells = list_2_new();
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			if(grid_cell(game_board->grid, x, y)->value == 0 && grid_cell(ai->weights, x, y)->value == best_weight)
+				list_2_add(cells, vector_2_new(x, y));
+		}
+	}
+
+	// Randomizing a cell
+	time_t t;
+	srand((unsigned)time(&t));
+
+	int cell = rand() % cells->count;
+
+	ai->pointer_x = list_2_vector(cells, cell)->x;
+	ai->pointer_y = list_2_vector(cells, cell)->y;
+
+	list_2_free(cells);
 }
 
 // Prints ai weights
