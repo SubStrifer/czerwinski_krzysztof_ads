@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include "..\include\list.h"
 
-void list_2_head(list_2_t* list_2);
-void list_2_tail(list_2_t* list_2);
+//void list_2_head(list_2_t* list_2);
+//void list_2_tail(list_2_t* list_2);
 
 // Allocates and returns a new list_2
 list_2_t* list_2_new()
 {
     list_2_t* list_2 = (list_2_t*)malloc(sizeof(list_2_t));
-    list_2->vector = NULL;
+    list_2->first = NULL;
+    list_2->last = NULL;
     list_2->count = 0;
-    list_2->pointer = -1;
 
     return list_2;
 }
@@ -18,18 +18,18 @@ list_2_t* list_2_new()
 // Removes a list and all its vectors from memory
 void list_2_free(list_2_t* list_2)
 {
-    list_2_head(list_2);
+    vector_2_t* vector = list_2->first;
 
     if(list_2->count > 0)
     {
-        while(list_2->vector->next != NULL)
+        while(vector->next != NULL)
         {
-            vector_2_t* next = list_2->vector->next;
-            vector_2_free(list_2->vector);
-            list_2->vector = next;
+            vector_2_t* next = vector->next;
+            vector_2_free(vector);
+            vector = next;
             list_2->count--;
         }
-        vector_2_free(list_2->vector);
+        vector_2_free(vector);
     }
 
     free(list_2);
@@ -41,17 +41,18 @@ vector_2_t* list_2_vector(list_2_t* list_2, int index)
     if(list_2->count == 0 || index >= list_2->count)
         return NULL;
     
-    list_2_head(list_2);
+    vector_2_t* vector = list_2->first;
+    int pointer = 0;
 
-    if(list_2->pointer == index)
-            return list_2->vector;
+    if(pointer == index)
+        return vector;
 
-    while(list_2->vector->next != NULL)
+    while(vector->next != NULL)
     {      
-        list_2->vector = list_2->vector->next;
-        list_2->pointer++;
-        if(list_2->pointer == index)
-            return list_2->vector;
+        vector = vector->next;
+        pointer++;
+        if(pointer == index)
+            return vector;
     }
     
     return NULL;
@@ -63,15 +64,16 @@ void list_2_add(list_2_t* list_2, vector_2_t* vector_2)
     // If there is no vectors yet
     if(list_2->count == 0)
     {
-        list_2->vector = vector_2;
+        list_2->first = vector_2;
+        list_2->last = vector_2;
         list_2->count = 1;
-        list_2->pointer = 0;
     }
     else
     {
-        list_2_tail(list_2);
-        list_2->vector->next = vector_2;
-        vector_2->prev = list_2->vector;
+        vector_2_t* vector = list_2->last;
+        vector->next = vector_2;
+        vector_2->prev = vector;
+        list_2->last = vector_2;
         list_2->count++;
     }
     
@@ -82,73 +84,46 @@ void list_2_remove(list_2_t* list_2, vector_2_t* vector_2)
 {
     if(list_2->count == 0)
         return;
-    
-    list_2_head(list_2);
+
+    vector_2_t* vector = list_2->first;
+
     // If vector was found at index 0
-    if(list_2->vector == vector_2)
+    if(vector == vector_2)
     {
-        list_2->vector = list_2->vector->next;
-        list_2->vector->prev = NULL;
+        vector = vector->next;
+        vector->prev = NULL;
+        list_2->first = vector;
         vector_2_free(vector_2);
         list_2->count--;
         return;
     }
-    while(list_2->vector->next != NULL)
+    while(vector->next != NULL)
     {
-        list_2->vector->next;
-        list_2->pointer++;
+        vector->next;
         // In middle
-        if(list_2->vector == vector_2)
+        if(vector == vector_2)
         {
-            vector_2_t* prev = vector_2->prev;
-            vector_2_t* next = vector_2->next;
+            vector_2_t* prev = vector->prev;
+            vector_2_t* next = vector->next;
 
-            list_2->vector = prev;
-            list_2->vector->next = next;
             next->prev = prev;
+            prev->next = next;
 
             vector_2_free(vector_2);
             list_2->count--;
-            list_2->pointer--;
             return;
         }
     }
     // At the end
-    if(list_2->vector == vector_2)
+    if(vector == vector_2)
     {
-        list_2->vector = list_2->vector->prev;
-        list_2->vector->next = NULL;
+        vector = vector->prev;
+        vector->next = NULL;
+        list_2->last = vector;
 
         vector_2_free(vector_2);
         list_2->count--;
-        list_2->pointer--;
         return;
     }
 
-}
-
-// Moves pointer of a list to the first struct
-void list_2_head(list_2_t* list_2)
-{
-    if(list_2->count == 0)
-        return;
-    
-    while(list_2->vector->prev != NULL)
-    {
-        list_2->vector = list_2->vector->prev;
-        list_2->pointer--;
-    }
-}
-
-// Moves pointer of a list to the last struct
-void list_2_tail(list_2_t* list_2)
-{
-    if(list_2->count == 0)
-        return;
-    
-    while(list_2->vector->next != NULL)
-    {
-        list_2->vector = list_2->vector->next;
-        list_2->pointer++;
-    }
 }

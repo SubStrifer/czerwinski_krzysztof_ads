@@ -4,9 +4,8 @@
 // List structure that holds vector_2 structures
 typedef struct
 {
-	vector_2_t* vector;
-	//todo might have two pointers - first and last instead of pointer
-    int pointer;
+	vector_2_t* first;
+	vector_2_t* last;
 	int count;
 
 } list_2_t;
