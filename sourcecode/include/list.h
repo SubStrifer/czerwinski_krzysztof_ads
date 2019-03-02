@@ -18,3 +18,4 @@ vector_2_t* list_2_vector(list_2_t*, int);
 //int list_2_index(list_2_t*, vector_2_t*);
 void list_2_add(list_2_t*, vector_2_t*);
 void list_2_remove(list_2_t*, vector_2_t*);
+void list_2_clear(list_2_t*);

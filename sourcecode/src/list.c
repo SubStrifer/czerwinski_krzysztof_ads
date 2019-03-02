@@ -18,19 +18,7 @@ list_2_t* list_2_new()
 // Removes a list and all its vectors from memory
 void list_2_free(list_2_t* list_2)
 {
-    vector_2_t* vector = list_2->first;
-
-    if(list_2->count > 0)
-    {
-        while(vector->next != NULL)
-        {
-            vector_2_t* next = vector->next;
-            vector_2_free(vector);
-            vector = next;
-            list_2->count--;
-        }
-        vector_2_free(vector);
-    }
+    list_2_clear(list_2);
 
     free(list_2);
 }
@@ -90,16 +78,19 @@ void list_2_remove(list_2_t* list_2, vector_2_t* vector_2)
     // If vector was found at index 0
     if(vector == vector_2)
     {
-        vector = vector->next;
-        vector->prev = NULL;
-        list_2->first = vector;
         vector_2_free(vector_2);
         list_2->count--;
+
+        if(list_2->count > 1)
+        {
+            vector = vector->next;
+            vector->prev = NULL;
+            list_2->first = vector;
+        }
         return;
     }
     while(vector->next != NULL)
     {
-        vector->next;
         // In middle
         if(vector == vector_2)
         {
@@ -113,6 +104,7 @@ void list_2_remove(list_2_t* list_2, vector_2_t* vector_2)
             list_2->count--;
             return;
         }
+        vector = vector->next;
     }
     // At the end
     if(vector == vector_2)
@@ -120,10 +112,32 @@ void list_2_remove(list_2_t* list_2, vector_2_t* vector_2)
         vector = vector->prev;
         vector->next = NULL;
         list_2->last = vector;
-
         vector_2_free(vector_2);
         list_2->count--;
         return;
     }
 
+}
+
+// Removes all elements from list and frees memory
+void list_2_clear(list_2_t* list_2)
+{
+    if(list_2->count == 0)
+        return;
+    printf("1");
+    vector_2_t* vector = list_2->first;
+    printf("2");
+    while(vector->next != NULL)
+    {
+        printf("3");
+        vector_2_t* remove = vector;
+        vector_2_free(remove);
+        vector = vector->next;
+    }
+    printf("4");
+    vector_2_free(vector);
+
+    list_2->first = NULL;
+    list_2->last = NULL;
+    list_2->count = 0;
 }

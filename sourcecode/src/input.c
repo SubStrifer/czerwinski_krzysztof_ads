@@ -33,6 +33,13 @@ int get_nav_key()
 	// Returning escape
 	if (key == KEY_ESC)
 		return KEY_ESC;
+	// Z & X are handled here as an exception for undo/redo feature
+	// Returning Z
+	if (key == KEY_Z)
+		return KEY_Z;
+	// Returning X
+	if (key == KEY_X)
+		return KEY_X;
 	// Returning -1 for everything else
 	return -1;
 }

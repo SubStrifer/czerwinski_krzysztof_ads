@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #include "..\include\grid.h"
+#include "..\include\list.h"
 #include "..\include\player.h"
 
 // Represents a board
@@ -13,6 +14,9 @@ typedef struct
 	player_t* player_1;
 	player_t* player_2;
 	player_t* current_player;
+	list_2_t* undo;
+	list_2_t* redo;
+
 } board_t;
 
 board_t* board_new(int, int, int, player_t*, player_t*);

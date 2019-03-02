@@ -2,10 +2,13 @@
 #include "..\include\board.h"
 #include "..\include\input.h"
 #include "..\include\ai.h"
+#include "..\include\game.h"
 
 void board_switch_player(board_t*);
 bool board_place_piece(board_t*);
 int board_check_win(board_t*);
+bool board_undo(board_t*);
+bool board_redo(board_t*);
 
 // Allocates and returns a new board
 board_t* board_new(int width, int height, int win_cond, player_t* player_1, player_t* player_2)
@@ -18,6 +21,8 @@ board_t* board_new(int width, int height, int win_cond, player_t* player_1, play
 	board->player_1 = player_1;
 	board->player_2 = player_2;
 	board->current_player = player_1;
+	board->undo = list_2_new();
+	board->redo = list_2_new();
 
 	return board;
 }
@@ -26,6 +31,9 @@ board_t* board_new(int width, int height, int win_cond, player_t* player_1, play
 void board_free(board_t* board)
 {
 	grid_free(board->grid);
+	list_2_free(board->undo);
+	list_2_free(board->redo);
+
 	free(board);
 }
 
@@ -35,11 +43,15 @@ void board_draw(board_t* board, bool display_pointer)
 	// Creating temp values
 	int width = board->grid->width;
 	int height = board->grid->height;
-
+	int shift = (GAME_WIDTH - 2 - width) / 2;
 	// Printing whole board
-	print_row(width + 2);
+	menu_divider();
 	for (int y = 0; y < height; y++)
 	{
+		printf("|");
+		// Print some spaces before the board
+		for(int i = 0; i < shift; i++)
+			printf(" ");
 		printf("|");
 		for (int x = 0; x < width; x++)
 		{
@@ -64,10 +76,13 @@ void board_draw(board_t* board, bool display_pointer)
 				break;
 			}
 		}
+		printf("|");
+		// Print some spaces after the board
+		for(int i = width + 2 + shift; i < GAME_WIDTH - 2; i++)
+			printf(" ");
 		printf("|\n");
-
 	}
-	print_row(width + 2);
+	menu_divider();
 }
 
 // Executes core gameplay
@@ -111,6 +126,12 @@ void board_play(board_t* board)
 					board_switch_player(board);
 				else
 					warning = true;
+				break;
+			case KEY_Z:
+				board_undo(board);
+				break;
+			case KEY_X:
+				board_redo(board);
 				break;
 			default:
 				break;
@@ -195,20 +216,60 @@ bool board_place_piece(board_t* board)
 	if (grid_cell(board->grid, board->pointer_x, board->pointer_y)->value != 0)
 		return false;
 
-	// Placing a piece is actually just a value in a cell
-	if (board->current_player == board->player_1)
-	{
-		//board->grid->cells[pointer_index].value = 1;
-		grid_cell(board->grid, board->pointer_x, board->pointer_y)->value = 1;
-		return true;
-	}
+	int player;
+	if(board->current_player == board->player_1)
+		player = 1;
 	else
-	{
-		//board->grid->cells[pointer_index].value = 2;
-		grid_cell(board->grid, board->pointer_x, board->pointer_y)->value = 2;
-		return true;
-	}
-	return false;
+		player = 2;
+
+	// Placing a value that represents a piece
+	grid_cell(board->grid, board->pointer_x, board->pointer_y)->value = player;
+	list_2_add(board->undo, vector_2_new(board->pointer_x, board->pointer_y));
+	list_2_clear(board->redo);
+
+	return true;
+
+}
+
+// Removes last placed piece
+bool board_undo(board_t* board)
+{
+	// Return if undo is empty
+	if(board->undo->count == 0)
+		return false;
+
+	int x = board->undo->last->x;
+	int y = board->undo->last->y;
+	grid_cell(board->grid, x, y)->value = 0;// Reset piece
+	list_2_add(board->redo, vector_2_new(x, y));// Add one step to redo
+	list_2_remove(board->undo, board->undo->last);// Remove undo that was just used
+	board_switch_player(board);// Switch player
+
+	return true;
+}
+
+// Tries to revert undo
+bool board_redo(board_t* board)
+{
+	// Return if redo is empty
+	if(board->redo->count == 0)
+		return false;
+
+	int player;
+	if(board->current_player == board->player_1)
+		player = 1;
+	else
+		player = 2;
+	
+	int x = board->redo->last->x;
+	int y = board->redo->last->y;
+
+	grid_cell(board->grid, x, y)->value = player;// Placing a piece
+	list_2_add(board->undo, vector_2_new(x, y));// Add one step to undo
+	list_2_remove(board->redo, board->redo->last);// Remove redo that was just used
+	board_switch_player(board);// Switch player
+
+	return true;
 }
 
 // Checks if either of the player wins
@@ -296,12 +357,26 @@ int board_check_win(board_t* board)
 		}
 
 	}
-	// Check if board board is full
-	if (false)
+	// Check if board is full
+	bool full = true;
+
+	for (int y = 0; y < board->grid->height; y++)
 	{
-		// Return draw
-		return 3;
+		if(!full)
+			break;
+
+		for (int x = 0; x < board->grid->width; x++)
+		{
+			if(grid_cell(board->grid, x, y)->value == 0)
+			{
+				full = false;
+				break;
+			}
+		}
 	}
+	// Return draw
+	if (full)
+		return 3;
 	// Return no win
 	return 0;
 }
