@@ -1,10 +1,10 @@
 #include <stdio.h>
-//#include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
 #include "..\include\game.h"
 
-const char* GAME_VERSION = "0.3";
+const char* GAME_VERSION = "0.6";
+const int GAME_WIDTH = 30;
 
 board_t* game_board;
 
@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	//scanf("%c", testChar);
 	player_t* player_1 = player_new("Player 1", 'X', false);
 	player_t* player_2 = player_new("Player 2", 'O', false);
-	game_board = board_new(10, 10, 5, player_1, player_2);
+	game_board = board_new(7, 7, 5, player_1, player_2);
 
 	int chosen = menu();
 	// Switching chosen option
@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 		// Swapping both player
 		player_1 = player_new("AI 1", 'X', true);
 		game_board->player_1 = player_1;
+		game_board->current_player = player_1;
 		player_2 = player_new("AI 2", 'O', true);
 		game_board->player_2 = player_2;
 		board_play(game_board);

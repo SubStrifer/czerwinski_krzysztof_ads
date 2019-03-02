@@ -20,16 +20,18 @@ option_t options[OPTIONS_COUNT];
 // Displaying top information
 void display_head()
 {
-	print_row(22);
-	printf(" Tic-Tac-Toe v%s\n", GAME_VERSION);
-	printf(" Krzysztof Czerwinski\n");
-	print_row(22);
+	menu_divider();
+	menu_row();
+	menu_print_2("Tic-Tac-Toe v", GAME_VERSION, true);
+	menu_print("Krzysztof Czerwinski", true);
+	menu_row();
+	menu_divider();
 }
 
 // Displaying bottom information
 void display_tail()
 {
-	print_row(22);
+	menu_divider();
 	printf(" Arrows to navigate,\n");
 	printf(" enter to confirm.\n");
 }
@@ -99,13 +101,87 @@ int menu()
 	return chosen;
 }
 
-// Prints a row of specific length with a + at start and end
-void print_row(int length)
+// Prints a row with a + at start and end
+void menu_divider()
 {
 	printf("+");
-	for (int i = 0; i < length - 2; i++)
+	for (int i = 0; i < GAME_WIDTH - 2; i++)
 	{
 		printf("-");
 	}
 	printf("+\n");
+}
+
+// Prints empty row with borders
+void menu_row()
+{
+	char* text = (char*)malloc(sizeof(char) * (GAME_WIDTH + 1));
+	strncpy(text, "", GAME_WIDTH);
+	strcpy(text, "|");
+	for(int i = 0; i < GAME_WIDTH - 2; i++)
+		strcat(text, " ");
+	strcat(text, "|\0");
+	// Printing text
+	printf("%s\n", text);
+	free(text);
+}
+
+// Prints text and adds | to both sides, centers the text if needed
+void menu_print(char* string, bool center)
+{
+	int max_length = GAME_WIDTH - 2;
+	char* trun = (char*)malloc(sizeof(char) * (GAME_WIDTH + 1));
+	char* text = (char*)malloc(sizeof(char) * (GAME_WIDTH + 1));
+	int length = strlen(string);
+	// Clear strings
+	strncpy(trun, "", GAME_WIDTH);
+	strncpy(text, "", GAME_WIDTH);
+	// Truncating the string to max_length
+	strncpy(trun, string, max_length);
+	// Adding | at the beginning
+	strcpy(text, "|");
+	// Adding truncated string
+	if(length >= max_length || !center)
+	{
+		strcat(text, trun);
+		// Adding spaces until right border is reached
+		for(int i = length; i < max_length; i++)
+			strcat(text, " ");
+	}
+	else// If shorter than max_length and centered
+	{
+		int shift = (max_length - length) / 2;
+		// Adding spaces before text
+		for(int i = 0; i < shift; i++)
+			strcat(text, " ");
+		// Adding text
+		strcat(text, trun);
+		// Adding spaces after text
+		for(int i = length + shift; i < max_length; i++)
+			strcat(text, " ");
+	}
+	
+	// Adding | at the end
+	strcat(text, "|\0");
+	// Printing text
+	printf("%s\n", text);
+	free(trun);
+	free(text);
+}
+
+// Prints two strings
+void menu_print_2(char* s1, char* s2, bool center)
+{
+	char* string = string_con(s1, s2);
+	menu_print(string, center);
+	free(string);
+}
+
+// Dynamically connects two string and returns the result
+char* string_con(char* s1, char* s2)
+{
+	char* string = (char*)malloc(sizeof(char) * (strlen(s1) + strlen(s2) + 1));
+	strcpy(string, s1);
+	strcat(string, s2);
+	return string;
 }
