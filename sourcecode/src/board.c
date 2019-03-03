@@ -11,16 +11,16 @@ bool board_undo(board_t*);
 bool board_redo(board_t*);
 
 // Allocates and returns a new board
-board_t* board_new(int width, int height, int win_cond, player_t* player_1, player_t* player_2)
+board_t* board_new(int width, int height, int win_cond)
 {
 	board_t* board = (board_t*)malloc(sizeof(board_t));
 	board->grid = grid_new(width, height);
 	board->pointer_x = 0;
 	board->pointer_y = 0;
 	board->win_cond = win_cond;
-	board->player_1 = player_1;
-	board->player_2 = player_2;
-	board->current_player = player_1;
+	board->player_1 = NULL;
+	board->player_2 = NULL;
+	board->current_player = NULL;
 	board->undo = list_2_new();
 	board->redo = list_2_new();
 
@@ -100,44 +100,55 @@ void board_play(board_t* board)
 	{
 		// Warning about cell being occupied
 		bool warning = false;
-		// Human player
-		if (board->current_player->ai == NULL)
+		// Flag for skipping Ai movement (needed for undo/redo)
+		bool ai_skip = false;
+		
+		if (board->current_player->ai != NULL)
+			printf("Press Z/X to undo/redo and any other key to continue.");
+
+		nav_key = get_nav_key();
+		// Handling navigation
+		switch (nav_key)
 		{
-			nav_key = get_nav_key();
-			// Handling navigation
-			switch (nav_key)
+		case KEY_UP:
+			board_move_pointer(board, 0, -1);
+			break;
+		case KEY_DOWN:
+			board_move_pointer(board, 0, 1);
+			break;
+		case KEY_LEFT:
+			board_move_pointer(board, -1, 0);
+			break;
+		case KEY_RIGHT:
+			board_move_pointer(board, 1, 0);
+			break;
+		case KEY_ENTER:
+			if (board->current_player->ai != NULL)
+				break;
+			// Placing a piece
+			if (board_place_piece(board))
+				// Switching player if piece has been placed
 			{
-			case KEY_UP:
-				board_move_pointer(board, 0, -1);
-				break;
-			case KEY_DOWN:
-				board_move_pointer(board, 0, 1);
-				break;
-			case KEY_LEFT:
-				board_move_pointer(board, -1, 0);
-				break;
-			case KEY_RIGHT:
-				board_move_pointer(board, 1, 0);
-				break;
-			case KEY_ENTER:
-				// Placing a piece
-				if (board_place_piece(board))
-					// Switching player if piece has been placed
-					board_switch_player(board);
-				else
-					warning = true;
-				break;
-			case KEY_Z:
-				board_undo(board);
-				break;
-			case KEY_X:
-				board_redo(board);
-				break;
-			default:
-				break;
+				ai_skip = true;
+				board_switch_player(board);
 			}
+			else
+				warning = true;
+			break;
+		case KEY_Z:
+			board_undo(board);
+			ai_skip = true;
+			break;
+		case KEY_X:
+			board_redo(board);
+			ai_skip = true;
+			break;
+		default:
+			break;
 		}
-		else// AI player
+
+		// AI player
+		if (board->current_player->ai != NULL && !ai_skip)
 		{
 			ai_calculate(board->current_player->ai);
 			board->pointer_x = board->current_player->ai->pointer_x;
@@ -146,9 +157,8 @@ void board_play(board_t* board)
 			if (board_place_piece(board))
 				// Switching player if piece has been placed
 				board_switch_player(board);
-			else
-				warning = true;
 		}
+				
 		// Clearing terminal
 		system("cls");
 		// Checking if somebody wins
@@ -158,16 +168,19 @@ void board_play(board_t* board)
 			// Redrawing the board
 			board_draw(board, false);
 			printf("%s wins!\n", board->player_1->name);
+			menu_wait();
 			return;
 		case 2:
 			// Redrawing the board
 			board_draw(board, false);
 			printf("%s wins!\n", board->player_2->name);
+			menu_wait();
 			return;
 		case 3:
 			// Redrawing the board
 			board_draw(board, false);
 			printf("It's a tie!\n");
+			menu_wait();
 			return;
 		default:
 			// Check if the next player is AI
@@ -178,11 +191,80 @@ void board_play(board_t* board)
 				board_draw(board, false);
 			break;
 		}
+
 		// Drawing board information
 		printf("It is now %s (%c) turn!\n", board->current_player->name, board->current_player->piece);
 		// Drawing warning
 		if(warning)
 			printf("This cell is already occupied!\n");
+	}
+}
+
+// Replays the board
+void board_replay(board_t* board)
+{
+	// Clearing terminal
+	system("cls");
+	// Drawing initial board
+	board_draw(board, false);
+	// Drawing board information
+	printf("It is now %s (%c) turn!\n", board->current_player->name, board->current_player->piece);
+	printf("Press Z/X or Left/Right Arrow to navigate the replay.");
+	int nav_key = -1;
+	// Handling gameplay unless escape key is pressed
+	while (nav_key != KEY_ESC)
+	{
+		nav_key = get_nav_key();
+		// Handling navigation
+		switch (nav_key)
+		{
+		case KEY_LEFT:
+			board_undo(board);
+			break;
+		case KEY_RIGHT:
+			board_redo(board);
+			break;
+		case KEY_Z:
+			board_undo(board);
+			break;
+		case KEY_X:
+			board_redo(board);
+			break;
+		default:
+			break;
+		}
+				
+		// Clearing terminal
+		system("cls");
+		// Checking if somebody wins
+		switch (board_check_win(board))
+		{
+		case 1:
+			// Redrawing the board
+			board_draw(board, false);
+			printf("%s wins!\n", board->player_1->name);
+			menu_wait();
+			return;
+		case 2:
+			// Redrawing the board
+			board_draw(board, false);
+			printf("%s wins!\n", board->player_2->name);
+			menu_wait();
+			return;
+		case 3:
+			// Redrawing the board
+			board_draw(board, false);
+			printf("It's a tie!\n");
+			menu_wait();
+			return;
+		default:
+			board_draw(board, false);
+			break;
+		}
+
+		// Drawing board information
+		printf("It is now %s (%c) turn!\n", board->current_player->name, board->current_player->piece);
+		printf("Press Z/X or Left/Right Arrow to navigate the replay.");
 	}
 }
 

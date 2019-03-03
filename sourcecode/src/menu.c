@@ -4,7 +4,7 @@
 #include "..\include\game.h"
 #include "..\include\input.h"
 
-#define OPTIONS_COUNT 5
+#define OPTIONS_COUNT 8
 
 int pointer;
 
@@ -41,15 +41,21 @@ void init()
 {
 	strcpy(options[0].text, "Human vs Human");
 	strcpy(options[1].text, "Human vs AI");
-	strcpy(options[2].text, "AI vs AI");
-	strcpy(options[3].text, "Settings");
-	strcpy(options[4].text, "Exit");
+	strcpy(options[2].text, "AI vs Human");
+	strcpy(options[3].text, "AI vs AI");
+	strcpy(options[4].text, "Replays");
+	strcpy(options[5].text, "Settings");
+	strcpy(options[6].text, "How to play");
+	strcpy(options[7].text, "Exit");
 
 	strcpy(options[0].info, "Classic duel.");
 	strcpy(options[1].info, "Face relentless AI.");
-	strcpy(options[2].info, "Watch AI struggle with itself.");
-	strcpy(options[3].info, "Adjust gameplay.");
-	strcpy(options[4].info, "Close the game.");
+	strcpy(options[2].info, "Face relentless AI.");
+	strcpy(options[3].info, "Watch AI struggle with itself.");
+	strcpy(options[4].info, "Replay past games.");
+	strcpy(options[5].info, "Adjust gameplay.");
+	strcpy(options[6].info, "Instructions about gameplay.");
+	strcpy(options[7].info, "Close the game.");
 }
 
 // Draws and handles menu
@@ -175,6 +181,13 @@ void menu_print_2(char* s1, char* s2, bool center)
 	char* string = string_con(s1, s2);
 	menu_print(string, center);
 	free(string);
+}
+
+// Waits until user clicks a key
+void menu_wait()
+{
+	printf("\n# Press any key to continue...");
+	getch();
 }
 
 // Dynamically connects two string and returns the result

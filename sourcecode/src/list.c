@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include "..\include\list.h"
 
-//void list_2_head(list_2_t* list_2);
-//void list_2_tail(list_2_t* list_2);
-
 // Allocates and returns a new list_2
 list_2_t* list_2_new()
 {
@@ -124,17 +121,13 @@ void list_2_clear(list_2_t* list_2)
 {
     if(list_2->count == 0)
         return;
-    printf("1");
     vector_2_t* vector = list_2->first;
-    printf("2");
     while(vector->next != NULL)
     {
-        printf("3");
         vector_2_t* remove = vector;
         vector_2_free(remove);
         vector = vector->next;
     }
-    printf("4");
     vector_2_free(vector);
 
     list_2->first = NULL;

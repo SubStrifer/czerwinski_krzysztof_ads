@@ -2,6 +2,7 @@
 #include "..\include\ai.h"
 #include "..\include\game.h"
 #include "..\include\list.h"
+#include "..\include\menu.h"
 
 int count_process(int);
 void ai_weights(ai_t*);
@@ -330,6 +331,10 @@ void ai_calculate(ai_t* ai)
 		}
 	}
 
+	// Return if there were no cells added
+	if(cells->count == 0)
+		return;
+
 	// Randomizing a cell
 	time_t t;
 	srand((unsigned)time(&t));
@@ -353,6 +358,5 @@ void ai_weights(ai_t* ai)
 			printf("%i\t", grid_cell(ai->weights, x, y)->value);
 		}
 	}
-	printf("\n# Press Enter to continue...");
-	getchar();
+	menu_wait();
 }

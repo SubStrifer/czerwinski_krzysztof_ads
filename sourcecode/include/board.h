@@ -19,9 +19,10 @@ typedef struct
 
 } board_t;
 
-board_t* board_new(int, int, int, player_t*, player_t*);
+board_t* board_new(int, int, int);
 void board_free(board_t*);
 void board_draw(board_t*, bool);
 void board_play(board_t*);
+void board_replay(board_t*);
 void board_move_pointer(board_t*, int, int);
 

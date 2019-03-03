@@ -24,5 +24,8 @@ player_t* player_new(char* name, char piece, bool ai)
 // Removes a player from memory
 void player_free(player_t* player)
 {
+	if(player == NULL)
+		return;
+
 	free(player);
 }

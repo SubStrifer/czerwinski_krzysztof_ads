@@ -2,8 +2,9 @@
 #include <time.h>
 #include <stdbool.h>
 #include "..\include\game.h"
+#include "..\include\file.h"
 
-const char* GAME_VERSION = "0.6";
+const char* GAME_VERSION = "0.7";
 const int GAME_WIDTH = 30;
 
 board_t* game_board;
@@ -11,39 +12,72 @@ board_t* game_board;
 // Main
 int main(int argc, char **argv)
 {
-	//scanf("%c", testChar);
-	player_t* player_1 = player_new("Player 1", 'X', false);
-	player_t* player_2 = player_new("Player 2", 'O', false);
-	game_board = board_new(7, 7, 5, player_1, player_2);
+	
+	
+	int chosen = -1;
 
-	int chosen = menu();
-	// Switching chosen option
-	switch (chosen)
+	while(chosen != 7)
 	{
-	case 0:
-		board_play(game_board);
-		printf("# Game ended.");
-		break;
-	case 1:
-		// Swapping second player
-		player_2 = player_new("AI", 'O', true);
-		game_board->player_2 = player_2;
-		board_play(game_board);
-		printf("# Game ended.");
-		break;
-	case 2:
-		// Swapping both player
-		player_1 = player_new("AI 1", 'X', true);
+		chosen = menu();
+		game_board = board_new(3, 3, 3);
+		player_t* player_1 = player_new("Player 1", 'X', false);
+		player_t* player_2 = player_new("Player 2", 'O', false);
 		game_board->player_1 = player_1;
-		game_board->current_player = player_1;
-		player_2 = player_new("AI 2", 'O', true);
 		game_board->player_2 = player_2;
-		board_play(game_board);
-		printf("# Game ended.");
-		break;
-	default:
-		printf("# See you next time!");
-		break;
+		game_board->current_player = player_1;
+
+		// Switching chosen option
+		switch (chosen)
+		{
+		case 0:// Human vs Human
+			board_play(game_board);
+			printf("# Game ended.");
+			replay_save("replay.txt", game_board);
+			break;
+		case 1:// Human vs AI
+			// Swapping second player
+			player_2 = player_new("AI", 'O', true);
+			game_board->player_2 = player_2;
+			board_play(game_board);
+			printf("# Game ended.");
+			replay_save("replay.txt", game_board);
+			break;
+		case 2:// AI vs Human
+			// Swapping first player
+			player_1 = player_new("AI", 'X', true);
+			game_board->player_1 = player_1;
+			board_play(game_board);
+			printf("# Game ended.");
+			replay_save("replay.txt", game_board);
+			break;
+		case 3:// AI vs AI
+			// Swapping both player
+			player_1 = player_new("AI 1", 'X', true);
+			game_board->player_1 = player_1;
+			game_board->current_player = player_1;
+			player_2 = player_new("AI 2", 'O', true);
+			game_board->player_2 = player_2;
+			board_play(game_board);
+			printf("# Game ended.");
+			replay_save("replay.txt", game_board);
+			break;
+		case 4:// Replays
+			board_replay(replay_load("replay.txt"));
+			break;
+		case 5:// Settings
+			
+			break;
+		case 6:// How to play
+			
+			break;
+		default:
+			printf("# See you next time!");
+			break;
+		}
+
+		board_free(game_board);
+		player_free(player_1);
+		player_free(player_2);
 	}
 
 	return 0;
