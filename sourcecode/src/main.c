@@ -5,7 +5,7 @@
 #include "..\include\file.h"
 
 const char* GAME_VERSION = "0.9";
-const int GAME_WIDTH = 30;
+const int GAME_WIDTH = 36;
 
 board_t* game_board;
 settings_t* game_settings;
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 			replay_save(game_board);
 			break;
 		case 4:// Replays
-			menu_replays();
+			
 			break;
 		case 5:// Settings
 			
@@ -80,6 +80,7 @@ int main(int argc, char **argv)
 		board_free(game_board);
 		player_free(player_1);
 		player_free(player_2);
+		chosen = 7;//todo temp
 	}
 
 	return 0;

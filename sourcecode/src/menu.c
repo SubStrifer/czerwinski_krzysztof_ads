@@ -1,118 +1,116 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "..\include\menu.h"
 #include "..\include\game.h"
 #include "..\include\input.h"
 #include "..\include\file.h"
 
-#define OPTIONS_COUNT 8
+submenu_t* main_menu;
 
-int pointer;
-
-// One option in menu
-typedef struct
-{
-	char text[32];// Option text
-	char info[32];// More informations about option
-} option_t;
-
-option_t options[OPTIONS_COUNT];
+menu_option(submenu_t*, char*, char*, void(*fun_ptr)(char*), char*);
+void fun_play(char*);
+void fun_replays(char*);
+void fun_settings(char*);
+void fun_how_to(char*);
 
 // Displaying top information
-void display_head()
+void display_title(submenu_t* submenu)
 {
 	menu_divider();
-	menu_row();
-	menu_print_2("Tic-Tac-Toe v", GAME_VERSION, true);
-	menu_print("Krzysztof Czerwinski", true);
-	menu_row();
+	menu_print(submenu->title, true);
 	menu_divider();
 }
 
 // Displaying bottom information
-void display_tail()
+void display_footer()
 {
 	menu_divider();
-	printf(" Arrows to navigate,\n");
-	printf(" enter to confirm.\n");
+	menu_print(" Arrows to navigate,", false);
+	menu_print(" Enter to confirm.", false);
+	menu_print_2("Krzysztof Czerwinski, v", GAME_VERSION, true);
+	menu_divider();
 }
 
 // Initializes possible options in menu
 void init()
 {
-	strcpy(options[0].text, "Human vs Human");
-	strcpy(options[1].text, "Human vs AI");
-	strcpy(options[2].text, "AI vs Human");
-	strcpy(options[3].text, "AI vs AI");
-	strcpy(options[4].text, "Replays");
-	strcpy(options[5].text, "Settings");
-	strcpy(options[6].text, "How to play");
-	strcpy(options[7].text, "Exit");
+	main_menu = submenu_new("Tic-Tac-Toe");
 
-	strcpy(options[0].info, "Classic duel.");
-	strcpy(options[1].info, "Face relentless AI.");
-	strcpy(options[2].info, "Face relentless AI.");
-	strcpy(options[3].info, "Watch AI struggle with itself.");
-	strcpy(options[4].info, "Replay past games.");
-	strcpy(options[5].info, "Adjust gameplay.");
-	strcpy(options[6].info, "Instructions about gameplay.");
-	strcpy(options[7].info, "Close the game.");
+	menu_option(main_menu, "Human vs Human", "Classic duel.", fun_play, "0");
+	menu_option(main_menu, "Human vs AI", "Face relentless AI.", fun_play, "1");
+	menu_option(main_menu, "AI vs Human", "Face relentless AI.", fun_play, "2");
+	menu_option(main_menu, "AI vs AI", "Watch AI struggle with itself.", fun_play, "3");
+	menu_option(main_menu, "Replays", "Replay past games.", fun_replays, "");
+	menu_option(main_menu, "Settings", "Adjust gameplay.", fun_settings, "");
+	menu_option(main_menu, "How to play", "Instructions about gameplay.", fun_how_to, "");
+	submenu_add(main_menu, option_new("Exit", "Close the game."));
+
 }
 
 // Draws and handles menu
-int menu()
+void menu()
 {
 	// Initialise menu
 	init();
-	// Menu navigation
-	int chosen = -1;// Chosen menu option
-	pointer = 0;// Current option highlight
+
+	// Show main menu
+	menu_draw(main_menu);
+}
+
+// Draws and handles submenus
+void menu_draw(submenu_t* submenu)
+{
 	// Loop until user chooses an option
-	while (chosen == -1)
+	while (submenu->pointer != -1)
 	{
 		// Clearing terminal
 		system("cls");
 		// Printing head
-		display_head();
+		display_title(submenu);
 		// Printing menu options
-		for (int i = 0; i < OPTIONS_COUNT; i++)
+		for (int i = 0; i < submenu->count; i++)
 		{
-			if (pointer == i)
-				printf("> ");
+			if (submenu->pointer == i)
+				menu_print_2("> ", submenu_option(submenu, i)->text, false);
 			else
-				printf("  ");
-			printf("%s\n", options[i].text);
+				menu_print_2("  ", submenu_option(submenu, i)->text, false);
 		}
+		option_t* highlighted = submenu_option(submenu, submenu->pointer);
 		// Printing more information about highlighted option
-		printf("\n %s\n", options[pointer].info);
+		menu_row();
+		menu_print(highlighted->info, true);
 		// Printing tail
-		display_tail();
+		display_footer();
 		// Handling navigation
 		switch (get_nav_key())
 		{
 		case KEY_UP:
-			if (pointer > 0)
-				pointer--;
+			if (submenu->pointer > 0)
+				submenu->pointer--;
 			break;
 		case KEY_DOWN:
-			if (pointer < OPTIONS_COUNT - 1)
-				pointer++;
+			if (submenu->pointer < submenu->count - 1)
+				submenu->pointer++;
 			break;
 		case KEY_ENTER:
-			chosen = pointer;
+			// Go back
+			if(highlighted->fun_ptr == NULL)
+			{
+				submenu->pointer = -1;
+				break;
+			}
+			// Execute a command
+			highlighted->fun_ptr(highlighted->args);
+			break;
+		case KEY_ESC:
+			submenu->pointer = -1;
 			break;
 		default:
 			break;
 		}
 	}
-	return chosen;
-}
-
-void menu_replays()
-{
-	//todo type filename to replay
-
-	board_replay(replay_load("replay.txt"));
+	return;
 }
 
 // Prints a row with a + at start and end
@@ -194,7 +192,8 @@ void menu_print_2(char* s1, char* s2, bool center)
 // Waits until user clicks a key
 void menu_wait()
 {
-	printf("\n# Press any key to continue...");
+	menu_print(" Press any key to continue...", false);
+	menu_row();
 	getch();
 }
 
@@ -206,3 +205,40 @@ char* string_con(char* s1, char* s2)
 	strcat(string, s2);
 	return string;
 }
+
+// Constructs a new submenu option and adds it to a submenu
+menu_option(submenu_t* submenu, char* text, char* info, void(*fun_ptr)(char*), char* args)
+{
+	option_t* option = option_new(text, info);
+	option->fun_ptr = fun_ptr;
+	strcpy(option->args, args);
+	submenu_add(submenu, option);
+}
+
+// Play function for option pointer
+void fun_play(char* args)
+{
+	int value = atoi(args);
+
+	printf("Option play %d!", value);
+	menu_wait();
+}
+
+// Submenu for replying past games
+void fun_replays(char* args)
+{
+	//board_replay(replay_load("replay.txt"));
+}
+
+// Submenu for adjusting game settings
+void fun_settings(char* args)
+{
+	
+}
+
+// Submenu showing how to play the game.
+void fun_how_to(char* args)
+{
+
+}
+

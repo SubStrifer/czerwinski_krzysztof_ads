@@ -121,7 +121,9 @@ void list_2_clear(list_2_t* list_2)
 {
     if(list_2->count == 0)
         return;
+
     vector_2_t* vector = list_2->first;
+    
     while(vector->next != NULL)
     {
         vector_2_t* remove = vector;
