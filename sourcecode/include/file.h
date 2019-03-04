@@ -2,5 +2,8 @@
 #include <stdbool.h>
 #include "..\include\board.h"
 
-bool replay_save(char*, board_t*);
+bool replay_save(board_t*);
 board_t* replay_load(char*);
+void replay_list();
+const char* get_file_ext(char*);
+bool file_exists(char*);

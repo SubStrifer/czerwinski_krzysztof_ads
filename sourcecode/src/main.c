@@ -4,15 +4,17 @@
 #include "..\include\game.h"
 #include "..\include\file.h"
 
-const char* GAME_VERSION = "0.7";
+const char* GAME_VERSION = "0.9";
 const int GAME_WIDTH = 30;
 
 board_t* game_board;
+settings_t* game_settings;
 
 // Main
 int main(int argc, char **argv)
 {
-	
+	game_settings = settings_new();
+	settings_load(game_settings, "settings");
 	
 	int chosen = -1;
 
@@ -32,7 +34,7 @@ int main(int argc, char **argv)
 		case 0:// Human vs Human
 			board_play(game_board);
 			printf("# Game ended.");
-			replay_save("replay.txt", game_board);
+			replay_save(game_board);
 			break;
 		case 1:// Human vs AI
 			// Swapping second player
@@ -40,7 +42,7 @@ int main(int argc, char **argv)
 			game_board->player_2 = player_2;
 			board_play(game_board);
 			printf("# Game ended.");
-			replay_save("replay.txt", game_board);
+			replay_save(game_board);
 			break;
 		case 2:// AI vs Human
 			// Swapping first player
@@ -48,7 +50,7 @@ int main(int argc, char **argv)
 			game_board->player_1 = player_1;
 			board_play(game_board);
 			printf("# Game ended.");
-			replay_save("replay.txt", game_board);
+			replay_save(game_board);
 			break;
 		case 3:// AI vs AI
 			// Swapping both player
@@ -59,10 +61,10 @@ int main(int argc, char **argv)
 			game_board->player_2 = player_2;
 			board_play(game_board);
 			printf("# Game ended.");
-			replay_save("replay.txt", game_board);
+			replay_save(game_board);
 			break;
 		case 4:// Replays
-			board_replay(replay_load("replay.txt"));
+			menu_replays();
 			break;
 		case 5:// Settings
 			

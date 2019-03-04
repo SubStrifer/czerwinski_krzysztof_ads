@@ -2,6 +2,7 @@
 #include <stdbool.h>
 
 int menu();
+void menu_replays();
 void menu_divider();
 void menu_row();
 void menu_print(char*, bool);

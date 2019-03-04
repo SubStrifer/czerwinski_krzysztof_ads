@@ -1,13 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h> 
+#include <string.h>
+#include <time.h>
 #include "..\include\file.h"
+#include "..\include\settings.h"
+#include "..\include\game.h"
 
 // Saves a replay to a file
-bool replay_save(char* file, board_t* board)
+bool replay_save(board_t* board)
 {
     FILE* outfile;
     
+    // Generating file name
+    char* file = settings_new_replay(game_settings);  
+
     // Open file
     outfile = fopen(file, "w");
 
@@ -57,6 +63,8 @@ bool replay_save(char* file, board_t* board)
     // Close file 
     fclose (outfile);
 
+    free(file);
+
     return true;
 }
 
@@ -81,8 +89,8 @@ board_t* replay_load(char* file)
 
     // Reading board info
     int* w = (int*)malloc(sizeof(int));
-    int* h = (int*)malloc(sizeof(int));;
-    int* win = (int*)malloc(sizeof(int));;
+    int* h = (int*)malloc(sizeof(int));
+    int* win = (int*)malloc(sizeof(int));
 
     fread(w, sizeof(int), 1, infile);
     fread(h, sizeof(int), 1, infile);
@@ -135,4 +143,40 @@ board_t* replay_load(char* file)
     board->current_player = player_1;
 
     return board;
+}
+
+// Prints all available replays
+void replay_list()
+{
+    /*DIR *d;
+    struct dirent *dir;
+    d = opendir(".");
+    if (d)
+    {
+        while ((dir = readdir(d)) != NULL)
+        {
+            printf("%s\n", dir->d_name);
+        }
+        closedir(d);
+    }*/
+}
+
+// Returns file extension
+const char* get_file_ext(char* file)
+{
+    const char* dot = strrchr(file, '.');
+    if(!dot || dot == file) return "";
+    return dot + 1;
+}
+
+// Returns true if file exists
+bool file_exists(char* file)
+{
+    FILE *f;
+    
+    if (f = fopen(file, "r")){
+        fclose(f);
+        return true;
+    }
+    return false;
 }

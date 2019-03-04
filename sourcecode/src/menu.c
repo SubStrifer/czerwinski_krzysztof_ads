@@ -3,6 +3,7 @@
 #include "..\include\menu.h"
 #include "..\include\game.h"
 #include "..\include\input.h"
+#include "..\include\file.h"
 
 #define OPTIONS_COUNT 8
 
@@ -105,6 +106,13 @@ int menu()
 		}
 	}
 	return chosen;
+}
+
+void menu_replays()
+{
+	//todo type filename to replay
+
+	board_replay(replay_load("replay.txt"));
 }
 
 // Prints a row with a + at start and end
