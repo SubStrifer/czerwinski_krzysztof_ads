@@ -47,3 +47,5 @@ create_dirs :
 clean :
 	@if exist $(BIN_DIR)\$(EXE) del $(BIN_DIR)\$(EXE)
 	@if exist $(OBJ_DIR)\*.obj del $(OBJ_DIR)\*.obj
+	@if exist *.replay del *.replay
+	@if exist $(BIN_DIR)\*.replay del $(BIN_DIR)\*.replay

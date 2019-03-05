@@ -9,3 +9,5 @@
 #### Compiling and running
 3. Type "nmake run" and confirm with Enter.
 4. Makefile will run the game in the terminal window immediately after compiling.
+
+Please keep in mind that using nmake removes all .replay files from the repo.
