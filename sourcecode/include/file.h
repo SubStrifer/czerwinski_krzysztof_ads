@@ -4,6 +4,6 @@
 
 bool replay_save(board_t*);
 board_t* replay_load(char*);
-void replay_list();
+list_2_t* replay_list(int);
 const char* get_file_ext(char*);
 bool file_exists(char*);

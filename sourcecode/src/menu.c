@@ -7,10 +7,13 @@
 #include "..\include\file.h"
 
 submenu_t* main_menu;
+submenu_t* replays_menu;
+submenu_t* settings_menu;
 
 menu_option(submenu_t*, char*, char*, void(*fun_ptr)(char*), char*);
 void fun_play(char*);
 void fun_replays(char*);
+void fun_replay(char*);
 void fun_settings(char*);
 void fun_how_to(char*);
 
@@ -37,6 +40,7 @@ void init()
 {
 	main_menu = submenu_new("Tic-Tac-Toe");
 
+	// Main menu
 	menu_option(main_menu, "Human vs Human", "Classic duel.", fun_play, "0");
 	menu_option(main_menu, "Human vs AI", "Face relentless AI.", fun_play, "1");
 	menu_option(main_menu, "AI vs Human", "Face relentless AI.", fun_play, "2");
@@ -46,6 +50,9 @@ void init()
 	menu_option(main_menu, "How to play", "Instructions about gameplay.", fun_how_to, "");
 	submenu_add(main_menu, option_new("Exit", "Close the game."));
 
+	// Settings
+	settings_menu = submenu_new("Settings");
+	submenu_add(settings_menu, option_new("Back", "Go back to main menu."));
 }
 
 // Draws and handles menu
@@ -56,6 +63,16 @@ void menu()
 
 	// Show main menu
 	menu_draw(main_menu);
+
+	// Free menus
+	submenu_free(main_menu);
+	submenu_free(settings_menu);
+	
+	//Printing goodbye
+	system("cls");
+	menu_divider();
+	menu_print(" See you next time!", true);
+	menu_divider();
 }
 
 // Draws and handles submenus
@@ -192,8 +209,9 @@ void menu_print_2(char* s1, char* s2, bool center)
 // Waits until user clicks a key
 void menu_wait()
 {
+	menu_divider();
 	menu_print(" Press any key to continue...", false);
-	menu_row();
+	menu_divider();
 	getch();
 }
 
@@ -220,25 +238,155 @@ void fun_play(char* args)
 {
 	int value = atoi(args);
 
-	printf("Option play %d!", value);
-	menu_wait();
+	// Adjusting win condition
+	int win_cond = 3;
+	int w = game_settings->board_width;
+	int h = game_settings->board_height;
+
+	if(w == 4 || h == 4)
+		win_cond = 4;
+	else if (w > 4 && h > 4)
+		win_cond = 5;
+
+	game_board = board_new(w, h, win_cond);
+	player_t* player_1 = player_new(game_settings->player_1_name, game_settings->player_1_piece, false);
+	player_t* player_2 = player_new(game_settings->player_2_name, game_settings->player_2_piece, false);
+	game_board->player_1 = player_1;
+	game_board->player_2 = player_2;
+	game_board->current_player = player_1;
+
+	// Switching game type
+	switch (value)
+	{
+	case 0:// Human vs Human
+		board_play(game_board);
+		replay_save(game_board);
+		break;
+	case 1:// Human vs AI
+		// Swapping second player
+		player_2 = player_new("AI", game_settings->player_2_piece, true);
+		game_board->player_2 = player_2;
+		board_play(game_board);
+		replay_save(game_board);
+		break;
+	case 2:// AI vs Human
+		// Swapping first player
+		player_1 = player_new("AI", game_settings->player_1_piece, true);
+		game_board->player_1 = player_1;
+		game_board->current_player = player_1;
+		board_play(game_board);
+		replay_save(game_board);
+		break;
+	case 3:// AI vs AI
+		// Swapping both player
+		player_1 = player_new("AI 1", game_settings->player_1_piece, true);
+		game_board->player_1 = player_1;
+		game_board->current_player = player_1;
+		player_2 = player_new("AI 2", game_settings->player_2_piece, true);
+		game_board->player_2 = player_2;
+		board_play(game_board);
+		replay_save(game_board);
+		break;
+	default:
+		break;
+	}
+
+	board_free(game_board);
+	player_free(player_1);
+	player_free(player_2);
+
 }
 
 // Submenu for replying past games
 void fun_replays(char* args)
 {
-	//board_replay(replay_load("replay.txt"));
+	// Replays menu
+	replays_menu = submenu_new("Replays");
+	submenu_add(replays_menu, option_new("Back", "Go back to main menu."));
+
+	// Loading available replays
+	list_2_t* replays_list = replay_list(game_settings->replay_last);
+
+	char* string = (char*)malloc(sizeof(char) * 20);
+
+	// Adding options to menu
+	for(int i = 0; i < replays_list->count; i++)
+	{
+		int number = list_2_vector(replays_list, i)->x;
+		sprintf(string, "%d", number);
+		menu_option(replays_menu, string, "Replay selected game.", fun_replay, string);
+	}
+
+	free(string);
+
+	menu_draw(replays_menu);
+
+	list_2_free(replays_list);
+	submenu_free(replays_menu);
+}
+
+// Replying a replay
+void fun_replay(char* args)
+{
+	char* file = (char*)malloc(sizeof(char) * 32);
+    strncpy(file, "", 31);
+
+	// Building replay filename
+	sprintf(file, "%d", atoi(args));
+	strcat(file, ".replay\0");
+	board_replay(replay_load(file));
+
+	free(file);
 }
 
 // Submenu for adjusting game settings
 void fun_settings(char* args)
 {
-	
+	menu_draw(settings_menu);
 }
 
 // Submenu showing how to play the game.
 void fun_how_to(char* args)
 {
+	// Draw mock submenu
+	while(true)
+	{
+		// Clearing terminal
+		system("cls");
+		// Printing title
+		menu_divider();
+		menu_print("How to play", true);
+		menu_divider();
+		// Printing content
+		menu_print("* Rules *", true);
+		menu_print(" - To win place 3, 4 or 5* pieces in a", false);
+		menu_print("   row", false);
+		menu_print(" * (number depends on the size of ", false);
+		menu_print("   the board)", false);
+		menu_print(" - You can only place piece on an ", false);
+		menu_print("   empty field", false);
 
+		menu_print(" - Game is played alternately by two ", false);
+		menu_print("   players", false);
+		
+		menu_print("* Board *", true);
+		menu_print(" * - board pointer,", false);
+		menu_print(" . - empty field,", false);
+		menu_print(" - Any other symbol will represent ", false);
+		menu_print("   players' pieces", false);
+		menu_print("* Controls *", true);
+		menu_print(" Arrows - move pointer", false);
+		menu_print(" Enter - place your piece", false);
+		menu_print(" Z/X - undo/redo", false);
+		menu_print(" * You can adjust gameplay in Settings", true);
+		// Printing mock back button
+		menu_row();
+		menu_print("> Back", false);
+		menu_divider();
+		// Handling input
+		int key = get_nav_key();
+		if(key == KEY_ENTER || key == KEY_ESC)
+			break;
+	}
 }
 

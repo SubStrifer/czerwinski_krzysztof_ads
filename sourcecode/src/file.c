@@ -5,6 +5,7 @@
 #include "..\include\file.h"
 #include "..\include\settings.h"
 #include "..\include\game.h"
+#include "..\include\list.h"
 
 // Saves a replay to a file
 bool replay_save(board_t* board)
@@ -145,20 +146,29 @@ board_t* replay_load(char* file)
     return board;
 }
 
-// Prints all available replays
-void replay_list()
+// Returns a list with all available replay numbers
+list_2_t* replay_list(int last_number)
 {
-    /*DIR *d;
-    struct dirent *dir;
-    d = opendir(".");
-    if (d)
+    list_2_t* list = list_2_new();
+
+    int number = -1;
+    char* file = (char*)malloc(sizeof(char) * 32);
+
+    // Checking files
+    while(number < last_number)
     {
-        while ((dir = readdir(d)) != NULL)
-        {
-            printf("%s\n", dir->d_name);
-        }
-        closedir(d);
-    }*/
+        number++;
+        strncpy(file, "", 31);
+        sprintf(file, "%d", number);
+        strcat(file, ".replay\0");
+        if(file_exists(file))
+            list_2_add(list, vector_2_new(number, 0));
+            //todo could use vector_t with one int value
+    }
+
+    free(file);
+    
+    return list;
 }
 
 // Returns file extension

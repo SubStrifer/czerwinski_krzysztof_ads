@@ -3,6 +3,7 @@
 #include "..\include\input.h"
 #include "..\include\ai.h"
 #include "..\include\game.h"
+#include "..\include\menu.h"
 
 void board_switch_player(board_t*);
 bool board_place_piece(board_t*);
@@ -30,6 +31,9 @@ board_t* board_new(int width, int height, int win_cond)
 // Removes a board from memory
 void board_free(board_t* board)
 {
+	if(board == NULL)
+		return;
+
 	grid_free(board->grid);
 	list_2_free(board->undo);
 	list_2_free(board->redo);
@@ -93,7 +97,9 @@ void board_play(board_t* board)
 	// Drawing initial board
 	board_draw(board, true);
 	// Drawing board information
-	printf("It is now %s (%c) turn!\n", board->current_player->name, board->current_player->piece);
+	menu_print(" It's now turn of:", false);
+	menu_print_2(" ", board->current_player->name, false);
+	menu_divider();
 	int nav_key = -1;
 	// Handling gameplay unless escape key is pressed
 	while (nav_key != KEY_ESC)
@@ -104,8 +110,12 @@ void board_play(board_t* board)
 		bool ai_skip = false;
 		
 		if (board->current_player->ai != NULL)
-			printf("Press Z/X to undo/redo and any other key to continue.");
-
+		{
+			menu_print(" Z/X to undo/redo.", false);
+			menu_print(" Any key to continue.", false);
+			menu_divider();
+		}
+		
 		nav_key = get_nav_key();
 		// Handling navigation
 		switch (nav_key)
@@ -167,19 +177,19 @@ void board_play(board_t* board)
 		case 1:
 			// Redrawing the board
 			board_draw(board, false);
-			printf("%s wins!\n", board->player_1->name);
+			menu_print_2(board->player_1->name, " wins!", true);
 			menu_wait();
 			return;
 		case 2:
 			// Redrawing the board
 			board_draw(board, false);
-			printf("%s wins!\n", board->player_2->name);
+			menu_print_2(board->player_2->name, " wins!", true);
 			menu_wait();
 			return;
 		case 3:
 			// Redrawing the board
 			board_draw(board, false);
-			printf("It's a tie!\n");
+			menu_print("It's a tie!", true);
 			menu_wait();
 			return;
 		default:
@@ -193,10 +203,12 @@ void board_play(board_t* board)
 		}
 
 		// Drawing board information
-		printf("It is now %s (%c) turn!\n", board->current_player->name, board->current_player->piece);
+		menu_print(" It's now turn of:", false);
+		menu_print_2(" ", board->current_player->name, false);
 		// Drawing warning
 		if(warning)
-			printf("This cell is already occupied!\n");
+			menu_print("This cell is already occupied!", true);
+		menu_divider();
 	}
 }
 
@@ -208,8 +220,11 @@ void board_replay(board_t* board)
 	// Drawing initial board
 	board_draw(board, false);
 	// Drawing board information
-	printf("It is now %s (%c) turn!\n", board->current_player->name, board->current_player->piece);
-	printf("Press Z/X or Left/Right Arrow to navigate the replay.");
+	menu_print(" It's now turn of:", false);
+	menu_print_2(" ", board->current_player->name, false);
+	menu_print(" Z/X or Left/Right Arrow", false);
+	menu_print(" to navigate the replay.", false);
+	menu_divider();
 	int nav_key = -1;
 	// Handling gameplay unless escape key is pressed
 	while (nav_key != KEY_ESC)
@@ -242,19 +257,19 @@ void board_replay(board_t* board)
 		case 1:
 			// Redrawing the board
 			board_draw(board, false);
-			printf("%s wins!\n", board->player_1->name);
+			menu_print_2(board->player_1->name, " wins!", true);
 			menu_wait();
 			return;
 		case 2:
 			// Redrawing the board
 			board_draw(board, false);
-			printf("%s wins!\n", board->player_2->name);
+			menu_print_2(board->player_2->name, " wins!", true);
 			menu_wait();
 			return;
 		case 3:
 			// Redrawing the board
 			board_draw(board, false);
-			printf("It's a tie!\n");
+			menu_print("It's a tie!", true);
 			menu_wait();
 			return;
 		default:
@@ -263,8 +278,17 @@ void board_replay(board_t* board)
 		}
 
 		// Drawing board information
-		printf("It is now %s (%c) turn!\n", board->current_player->name, board->current_player->piece);
-		printf("Press Z/X or Left/Right Arrow to navigate the replay.");
+		menu_print(" It's now turn of:", false);
+		menu_print_2(" ", board->current_player->name, false);
+		menu_print(" Z/X or Left/Right Arrow", false);
+		menu_print(" to navigate the replay.", false);
+		if(board->redo->count == 0)
+		{
+			menu_divider();
+			menu_print(" That was the last move in this game.", false);
+			menu_print(" Press Esc to exit replaying.", false);
+		}
+		menu_divider();
 	}
 }
 

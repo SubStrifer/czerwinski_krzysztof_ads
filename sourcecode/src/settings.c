@@ -13,14 +13,14 @@ settings_t* settings_new()
     strcpy(settings->player_1_name, "Player 1");
     settings->player_1_piece = 'X';
     strcpy(settings->player_2_name, "Player 2");
-    settings->player_1_piece = 'O';
+    settings->player_2_piece = 'O';
     settings->replay_last = -1;
 
     return settings;
 }
 
 // Removes a settings_t from memory
-void setting_free(settings_t* settings)
+void settings_free(settings_t* settings)
 {
     if(settings != NULL)
         free(settings);

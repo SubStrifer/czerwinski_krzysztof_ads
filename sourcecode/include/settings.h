@@ -14,7 +14,7 @@ typedef struct
 } settings_t;
 
 settings_t* settings_new();
-void setting_free(settings_t*);
+void settings_free(settings_t*);
 void settings_load(settings_t*, char*);
 bool settings_save(settings_t*, char*);
 char* settings_new_replay(settings_t*);
