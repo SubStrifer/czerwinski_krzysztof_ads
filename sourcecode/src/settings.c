@@ -15,6 +15,8 @@ settings_t* settings_new()
     strcpy(settings->player_2_name, "Player 2");
     settings->player_2_piece = 'O';
     settings->replay_last = -1;
+    settings->undo_redo = true;
+    settings->draw_weights = false;
 
     return settings;
 }
@@ -41,7 +43,7 @@ void settings_load(settings_t* settings, char* file)
         return;
     }
 
-    fread(&settings, sizeof(settings_t), 1, infile);
+    fread(settings, sizeof(settings_t), 1, infile);
 
     // Close file 
     fclose (infile);
@@ -61,7 +63,7 @@ bool settings_save(settings_t* settings, char* file)
         return false;
     }
 
-    fwrite(&settings, sizeof(settings_t), 1, outfile);
+    fwrite(settings, sizeof(settings_t), 1, outfile);
 
     // Close file 
     fclose (outfile);

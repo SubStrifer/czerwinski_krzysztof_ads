@@ -109,14 +109,15 @@ void board_play(board_t* board)
 		// Flag for skipping Ai movement (needed for undo/redo)
 		bool ai_skip = false;
 		
-		if (board->current_player->ai != NULL)
+		if (board->current_player->ai != NULL && game_settings->undo_redo)
 		{
-			menu_print(" Z/X to undo/redo.", false);
-			menu_print(" Any key to continue.", false);
-			menu_divider();
+			menu_print(" Press Z/X to undo/redo.", false);
+			menu_print(" Press any key to continue.", false);
+			menu_divider();		
 		}
-		
-		nav_key = get_nav_key();
+
+		if(board->current_player->ai == NULL || game_settings->undo_redo)
+			nav_key = get_nav_key();
 		// Handling navigation
 		switch (nav_key)
 		{
@@ -137,7 +138,7 @@ void board_play(board_t* board)
 				break;
 			// Placing a piece
 			if (board_place_piece(board))
-				// Switching player if piece has been placed
+			// Switching player if piece has been placed
 			{
 				ai_skip = true;
 				board_switch_player(board);
@@ -146,11 +147,13 @@ void board_play(board_t* board)
 				warning = true;
 			break;
 		case KEY_Z:
-			board_undo(board);
+			if(game_settings->undo_redo)
+				board_undo(board);
 			ai_skip = true;
 			break;
 		case KEY_X:
-			board_redo(board);
+			if(game_settings->undo_redo)
+				board_redo(board);
 			ai_skip = true;
 			break;
 		default:

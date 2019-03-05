@@ -300,7 +300,8 @@ void ai_calculate(ai_t* ai)
 	}
 
 	// Display weights
-	//ai_weights(ai);
+	if(game_settings->draw_weights)
+		ai_weights(ai);
 
 	// Iterating again and searching for the best weight
 	int best_weight = -1;
@@ -350,6 +351,7 @@ void ai_calculate(ai_t* ai)
 // Prints ai weights
 void ai_weights(ai_t* ai)
 {
+	menu_print("AI weights:", true);
 	for (int y = 0; y < ai->weights->height; y++)
 	{
 		printf("\n");
@@ -358,5 +360,6 @@ void ai_weights(ai_t* ai)
 			printf("%i\t", grid_cell(ai->weights, x, y)->value);
 		}
 	}
+	printf("\n");
 	menu_wait();
 }

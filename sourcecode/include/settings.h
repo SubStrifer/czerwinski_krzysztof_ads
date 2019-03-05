@@ -10,6 +10,8 @@ typedef struct
     char player_2_name[20];
     char player_2_piece;
     int replay_last;
+    bool undo_redo;
+    bool draw_weights;
 
 } settings_t;
 

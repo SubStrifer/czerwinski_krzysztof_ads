@@ -15,6 +15,9 @@ void fun_play(char*);
 void fun_replays(char*);
 void fun_replay(char*);
 void fun_settings(char*);
+void fun_setting(char*);
+void fun_board_w(char*);
+void fun_board_h(char*);
 void fun_how_to(char*);
 
 // Displaying top information
@@ -41,18 +44,41 @@ void init()
 	main_menu = submenu_new("Tic-Tac-Toe");
 
 	// Main menu
-	menu_option(main_menu, "Human vs Human", "Classic duel.", fun_play, "0");
-	menu_option(main_menu, "Human vs AI", "Face relentless AI.", fun_play, "1");
-	menu_option(main_menu, "AI vs Human", "Face relentless AI.", fun_play, "2");
-	menu_option(main_menu, "AI vs AI", "Watch AI struggle with itself.", fun_play, "3");
-	menu_option(main_menu, "Replays", "Replay past games.", fun_replays, "");
-	menu_option(main_menu, "Settings", "Adjust gameplay.", fun_settings, "");
-	menu_option(main_menu, "How to play", "Instructions about gameplay.", fun_how_to, "");
-	submenu_add(main_menu, option_new("Exit", "Close the game."));
+	menu_option(main_menu, "Human vs Human", "Classic duel", fun_play, "0");
+	menu_option(main_menu, "Human vs AI", "Face relentless AI", fun_play, "1");
+	menu_option(main_menu, "AI vs Human", "Face relentless AI", fun_play, "2");
+	menu_option(main_menu, "AI vs AI", "Watch AI struggle with itself", fun_play, "3");
+	menu_option(main_menu, "Replays", "Replay past games", fun_replays, "");
+	menu_option(main_menu, "Settings", "Adjust gameplay", fun_settings, "");
+	menu_option(main_menu, "How to play", "Instructions about gameplay", fun_how_to, "");
+	submenu_add(main_menu, option_new("Exit", "Close the game"));
 
 	// Settings
 	settings_menu = submenu_new("Settings");
-	submenu_add(settings_menu, option_new("Back", "Go back to main menu."));
+	submenu_add(settings_menu, option_new("Back", "Go back to main menu"));
+	menu_option(settings_menu, "Player 1 name", "Change Player 1 name", fun_setting, "1");
+	menu_option(settings_menu, "Player 2 name", "Change Player 2 name", fun_setting, "2");
+	menu_option(settings_menu, "Player 1 piece", "Change Player 1 piece", fun_setting, "3");
+	menu_option(settings_menu, "Player 2 piece", "Change Player 2 piece", fun_setting, "4");
+	menu_option(settings_menu, "Board width", "Change Board width", fun_board_w, "");
+	menu_option(settings_menu, "Board height", "Change Board height", fun_board_h, "");
+	menu_option(settings_menu, "Undo and Redo", "Enable or Disable Undo and Redo", fun_setting, "7");
+	menu_option(settings_menu, "Draw AI weights", "Draw weights before every move", fun_setting, "8");
+	
+	// Update Settings texts
+	if(game_settings->undo_redo)
+		strcpy(submenu_option(settings_menu, 7)->text, "Undo and Redo: yes");
+	else
+		strcpy(submenu_option(settings_menu, 7)->text, "Undo and Redo: no");
+
+	if(game_settings->draw_weights)
+		strcpy(submenu_option(settings_menu, 8)->text, "Draw AI weights: yes");
+	else
+		strcpy(submenu_option(settings_menu, 8)->text, "Draw AI weights: no");
+
+	sprintf(submenu_option(settings_menu, 5)->text, "Board width: < %d >", game_settings->board_width);
+	sprintf(submenu_option(settings_menu, 6)->text, "Board height: < %d >", game_settings->board_height);
+	
 }
 
 // Draws and handles menu
@@ -109,6 +135,16 @@ void menu_draw(submenu_t* submenu)
 		case KEY_DOWN:
 			if (submenu->pointer < submenu->count - 1)
 				submenu->pointer++;
+			break;
+		case KEY_LEFT:
+			// Execute a command with "-1" args
+			if(highlighted->fun_ptr != NULL)
+				highlighted->fun_ptr("-1");
+			break;
+		case KEY_RIGHT:
+			// Execute a command with "1" args
+			if(highlighted->fun_ptr != NULL)
+				highlighted->fun_ptr("1");
 			break;
 		case KEY_ENTER:
 			// Go back
@@ -302,7 +338,7 @@ void fun_replays(char* args)
 {
 	// Replays menu
 	replays_menu = submenu_new("Replays");
-	submenu_add(replays_menu, option_new("Back", "Go back to main menu."));
+	submenu_add(replays_menu, option_new("Back", "Go back to main menu"));
 
 	// Loading available replays
 	list_2_t* replays_list = replay_list(game_settings->replay_last);
@@ -314,7 +350,7 @@ void fun_replays(char* args)
 	{
 		int number = list_2_vector(replays_list, i)->x;
 		sprintf(string, "%d", number);
-		menu_option(replays_menu, string, "Replay selected game.", fun_replay, string);
+		menu_option(replays_menu, string, "Replay selected game", fun_replay, string);
 	}
 
 	free(string);
@@ -331,18 +367,88 @@ void fun_replay(char* args)
 	char* file = (char*)malloc(sizeof(char) * 32);
     strncpy(file, "", 31);
 
+	//todo doesnt always work
 	// Building replay filename
 	sprintf(file, "%d", atoi(args));
 	strcat(file, ".replay\0");
-	board_replay(replay_load(file));
+	board_t* board = replay_load(file); 
+	board_replay(board);
 
 	free(file);
+	board_free(board);
 }
 
 // Submenu for adjusting game settings
 void fun_settings(char* args)
 {
+	// Changing 
 	menu_draw(settings_menu);
+
+	// Resetting submenu pointer
+	settings_menu->pointer = 0;
+
+	// Saving settings to file
+	settings_save(game_settings, "settings");
+}
+
+void fun_setting(char* args)
+{
+	int number = atoi(args);
+
+	switch(number)
+	{
+		case 1:// Player 1 name
+			
+			break;
+		case 2:// Player 2 name
+			
+			break;
+		case 3:// Player 1 piece
+			
+			break;
+		case 4:// Player 2 piece
+			
+			break;
+		case 7:// Undo/Redo
+			game_settings->undo_redo = !game_settings->undo_redo;
+			if(game_settings->undo_redo)
+				strcpy(submenu_option(settings_menu, 7)->text, "Undo and Redo: yes");
+			else
+				strcpy(submenu_option(settings_menu, 7)->text, "Undo and Redo: no");
+			break;
+		case 8:// Weights
+			game_settings->draw_weights = !game_settings->draw_weights;
+			if(game_settings->draw_weights)
+				strcpy(submenu_option(settings_menu, 8)->text, "Draw AI weights: yes");
+			else
+				strcpy(submenu_option(settings_menu, 8)->text, "Draw AI weights: no");
+			break;
+	}
+}
+
+// Change board width
+void fun_board_w(char* args)
+{
+	int number = atoi(args);
+
+	if(game_settings->board_width + number >= 3 && game_settings->board_width + number <= 10)
+		game_settings->board_width += number;
+
+	// Update text
+	sprintf(submenu_option(settings_menu, 5)->text, "Board width: < %d >", game_settings->board_width);
+}
+
+// Change board height
+void fun_board_h(char* args)
+{
+	int number = atoi(args);
+
+	if(game_settings->board_height + number >= 3 && game_settings->board_height + number <= 10)
+		game_settings->board_height += number;
+
+	// Update text
+	sprintf(submenu_option(settings_menu, 6)->text, "Board height: < %d >", game_settings->board_height);
+
 }
 
 // Submenu showing how to play the game.
