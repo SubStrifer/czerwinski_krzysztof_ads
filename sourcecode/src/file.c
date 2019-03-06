@@ -23,9 +23,6 @@ bool replay_save(board_t* board)
         fprintf(stderr, "\n# Error opening a file.\n"); 
         return false;
     }
-    
-    bool* t = (bool*)malloc(sizeof(bool));
-    bool* f = (bool*)malloc(sizeof(bool));
 
     // Saving board info
     fwrite(&board->grid->width, sizeof(int), 1, outfile);
@@ -33,22 +30,12 @@ bool replay_save(board_t* board)
     fwrite(&board->win_cond, sizeof(int), 1, outfile);
 
     // Saving players info
-    fwrite(&board->player_1->name, sizeof(char) * 20, 1, outfile);
+    fwrite(&board->player_1->name, sizeof(char) * 21, 1, outfile);
     fwrite(&board->player_1->piece, sizeof(char), 1, outfile);
-    if(board->player_1->ai != NULL)
-        fwrite(&t, sizeof(bool), 1, outfile);
-    else
-        fwrite(&f, sizeof(bool), 1, outfile);
 
-    fwrite(&board->player_2->name, sizeof(char) * 20, 1, outfile);
+    fwrite(&board->player_2->name, sizeof(char) * 21, 1, outfile);
     fwrite(&board->player_2->piece, sizeof(char), 1, outfile);
-    if(board->player_2->ai != NULL)
-        fwrite(&t, sizeof(bool), 1, outfile);
-    else
-        fwrite(&f, sizeof(bool), 1, outfile);
 
-    free(t);
-    free(f);
     // Saving moves
     vector_2_t* move = board->undo->last;
 
@@ -58,8 +45,6 @@ bool replay_save(board_t* board)
         fwrite(&move->y, sizeof(int), 1, outfile);
         move = move->prev;
     }
-
-    //if(fwrite != 0)
   
     // Close file 
     fclose (outfile);
@@ -104,24 +89,20 @@ board_t* replay_load(char* file)
     free(win);
     
     // Reading players info
-    char* name = (char*)malloc(sizeof(char) * 20);
+    char* name = (char*)malloc(sizeof(char) * 21);
     char piece;
-    bool* ai = (bool*)malloc(sizeof(bool));
 
-    fread(name, sizeof(char) * 20, 1, infile);
+    fread(name, sizeof(char) * 21, 1, infile);
     fread(&piece, sizeof(char), 1, infile);
-    fread(ai, sizeof(bool), 1, infile);
 
-    player_1 = player_new(name, piece, ai);
+    player_1 = player_new(name, piece, false);
 
-    fread(name, sizeof(char) * 20, 1, infile);
+    fread(name, sizeof(char) * 21, 1, infile);
     fread(&piece, sizeof(char), 1, infile);
-    fread(ai, sizeof(bool), 1, infile);
 
-    player_2 = player_new(name, piece, ai);
+    player_2 = player_new(name, piece, false);
 
     free(name);
-    free(ai);
 
     // Reading moves
     int* x = (int*)malloc(sizeof(int));

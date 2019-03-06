@@ -5,7 +5,7 @@
 // Represents a player
 typedef struct
 {
-	char name[20];
+	char name[21];
 	char piece;
 	ai_t* ai;
 } player_t;

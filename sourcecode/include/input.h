@@ -7,8 +7,11 @@
 #define KEY_RIGHT 0x4D
 #define KEY_ENTER 0x0D
 #define KEY_ESC 0x1B
+#define KEY_SPACE 0x20
+#define KEY_BACKSPACE 0x08
 #define KEY_Z 0x7A
 #define KEY_X 0x78
 
 int get_nav_key();
+int get_av_key();
 void display_key_codes();

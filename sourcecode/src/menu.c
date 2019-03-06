@@ -11,11 +11,15 @@ submenu_t* replays_menu;
 submenu_t* settings_menu;
 
 menu_option(submenu_t*, char*, char*, void(*fun_ptr)(char*), char*);
+
+// Submenu options functions
 void fun_play(char*);
 void fun_replays(char*);
 void fun_replay(char*);
 void fun_settings(char*);
 void fun_setting(char*);
+void fun_name(char*);
+void fun_piece(char*);
 void fun_board_w(char*);
 void fun_board_h(char*);
 void fun_how_to(char*);
@@ -56,16 +60,22 @@ void init()
 	// Settings
 	settings_menu = submenu_new("Settings");
 	submenu_add(settings_menu, option_new("Back", "Go back to main menu"));
-	menu_option(settings_menu, "Player 1 name", "Change Player 1 name", fun_setting, "1");
-	menu_option(settings_menu, "Player 2 name", "Change Player 2 name", fun_setting, "2");
-	menu_option(settings_menu, "Player 1 piece", "Change Player 1 piece", fun_setting, "3");
-	menu_option(settings_menu, "Player 2 piece", "Change Player 2 piece", fun_setting, "4");
+	menu_option(settings_menu, "Player 1 name", "Change Player 1 name", fun_name, "1");
+	menu_option(settings_menu, "Player 2 name", "Change Player 2 name", fun_name, "2");
+	menu_option(settings_menu, "Player 1 piece", "Change Player 1 piece", fun_piece, "1");
+	menu_option(settings_menu, "Player 2 piece", "Change Player 2 piece", fun_piece, "2");
 	menu_option(settings_menu, "Board width", "Change Board width", fun_board_w, "");
 	menu_option(settings_menu, "Board height", "Change Board height", fun_board_h, "");
 	menu_option(settings_menu, "Undo and Redo", "Enable or Disable Undo and Redo", fun_setting, "7");
 	menu_option(settings_menu, "Draw AI weights", "Draw weights before every move", fun_setting, "8");
 	
 	// Update Settings texts
+	sprintf(submenu_option(settings_menu, 3)->text, "Player 1 piece: %c", game_settings->player_1_piece);
+	sprintf(submenu_option(settings_menu, 4)->text, "Player 2 piece: %c", game_settings->player_2_piece);
+
+	sprintf(submenu_option(settings_menu, 5)->text, "Board width: < %d >", game_settings->board_width);
+	sprintf(submenu_option(settings_menu, 6)->text, "Board height: < %d >", game_settings->board_height);
+
 	if(game_settings->undo_redo)
 		strcpy(submenu_option(settings_menu, 7)->text, "Undo and Redo: yes");
 	else
@@ -75,9 +85,6 @@ void init()
 		strcpy(submenu_option(settings_menu, 8)->text, "Draw AI weights: yes");
 	else
 		strcpy(submenu_option(settings_menu, 8)->text, "Draw AI weights: no");
-
-	sprintf(submenu_option(settings_menu, 5)->text, "Board width: < %d >", game_settings->board_width);
-	sprintf(submenu_option(settings_menu, 6)->text, "Board height: < %d >", game_settings->board_height);
 	
 }
 
@@ -344,16 +351,19 @@ void fun_replays(char* args)
 	list_2_t* replays_list = replay_list(game_settings->replay_last);
 
 	char* string = (char*)malloc(sizeof(char) * 20);
+	char* text = (char*)malloc(sizeof(char) * 32);
 
 	// Adding options to menu
 	for(int i = 0; i < replays_list->count; i++)
 	{
 		int number = list_2_vector(replays_list, i)->x;
 		sprintf(string, "%d", number);
-		menu_option(replays_menu, string, "Replay selected game", fun_replay, string);
+		sprintf(text, "Replay %d", number);
+		menu_option(replays_menu, text, "Replay selected game", fun_replay, string);
 	}
 
 	free(string);
+	free(text);
 
 	menu_draw(replays_menu);
 
@@ -364,15 +374,23 @@ void fun_replays(char* args)
 // Replying a replay
 void fun_replay(char* args)
 {
+	if(atoi(args) < 0)
+		return;
+
 	char* file = (char*)malloc(sizeof(char) * 32);
     strncpy(file, "", 31);
 
-	//todo doesnt always work
 	// Building replay filename
 	sprintf(file, "%d", atoi(args));
 	strcat(file, ".replay\0");
-	board_t* board = replay_load(file); 
-	board_replay(board);
+
+	board_t* board;
+
+	if(file_exists(file))
+	{
+		board = replay_load(file); 
+		board_replay(board);
+	}
 
 	free(file);
 	board_free(board);
@@ -397,18 +415,6 @@ void fun_setting(char* args)
 
 	switch(number)
 	{
-		case 1:// Player 1 name
-			
-			break;
-		case 2:// Player 2 name
-			
-			break;
-		case 3:// Player 1 piece
-			
-			break;
-		case 4:// Player 2 piece
-			
-			break;
 		case 7:// Undo/Redo
 			game_settings->undo_redo = !game_settings->undo_redo;
 			if(game_settings->undo_redo)
@@ -424,6 +430,151 @@ void fun_setting(char* args)
 				strcpy(submenu_option(settings_menu, 8)->text, "Draw AI weights: no");
 			break;
 	}
+}
+
+// Change player name
+void fun_name(char* args)
+{
+	int player = atoi(args);
+	int key = -1;
+	char* name = (char*)malloc(sizeof(char) * 21);
+	//strncpy(name, "", 21);
+	
+	if(player == 1)
+		strcpy(name, game_settings->player_1_name);
+	else
+		strcpy(name, game_settings->player_2_name);
+
+	int length = strlen(name);
+	//name[length] = '\0';
+
+	bool loop = true;
+
+	while(loop)
+	{
+		system("cls");
+		menu_divider();
+		menu_print_2("Change name for Player ", args, true);
+		menu_divider();
+		menu_print("You can only use digits and letters.", false);
+		menu_print("Allowed length is 1-20 characters.", false);
+		menu_divider();
+		menu_print_2("Chosen name: ", name, false);
+		menu_divider();
+		menu_print("Press Enter to confirm.", false);
+		menu_print("Press Esc to cancel.", false);
+		menu_divider();
+
+		key = get_an_key();
+
+		switch (key)
+		{
+			case KEY_ENTER:// Confirming
+				if(length > 0)
+					loop = false;
+				break;
+			case KEY_ESC:
+				free(name);
+				return;
+			case KEY_SPACE:// Adding space
+				if(length > 19)
+					break;
+				name[length] = ' ';
+				length++;
+				name[length] = '\0';
+				break;
+			case KEY_BACKSPACE:// Removing a character
+				if(length <= 0)
+					break;
+				length--;
+				name[length] = '\0';				
+				break;
+			case -1:
+				break;
+			default:// Adding a character
+				if(length > 19)
+					break;
+				
+				name[length] = key;
+				length++;
+				name[length] = '\0';
+				break;
+		}
+	}
+	// Changing name if length is higher than 0
+	if(player == 1)
+		strcpy(game_settings->player_1_name, name);
+	else
+		strcpy(game_settings->player_2_name, name);
+
+	free(name);
+}
+
+// Change player piece
+void fun_piece(char* args)
+{
+	int player = atoi(args);
+	int key = -1;
+	char* pointer = (char*)malloc(sizeof(char) * 2);
+	strncpy(pointer, "", 2);
+
+	char piece;
+	if(player == 1)
+		piece = game_settings->player_1_piece;
+	else
+		piece = game_settings->player_2_piece;
+
+	*pointer = piece;
+
+	bool loop = true;
+
+	while(loop)
+	{
+		system("cls");
+		menu_divider();
+		menu_print_2("Change piece for Player ", args, true);
+		menu_divider();
+		menu_print("You can only use digits and letters.", false);
+		menu_divider();
+		menu_print_2("Chosen piece: ", pointer, false);
+		menu_divider();
+		menu_print("Press Enter to confirm.", false);
+		menu_print("Press Esc to cancel.", false);
+		menu_divider();
+
+		key = get_an_key();
+
+		switch (key)
+		{
+			case KEY_ENTER:
+				loop = false;
+				break;
+			case KEY_ESC:
+				free(pointer);
+				return;
+			case KEY_SPACE:
+				break;
+			case KEY_BACKSPACE:
+				break;
+			case -1:
+				break;
+			default:
+				piece = key;
+				*pointer = piece;
+				break;
+		}
+	}
+	// Changing piece
+	if(player == 1)
+		game_settings->player_1_piece = piece;
+	else
+		game_settings->player_2_piece = piece;
+
+	free(pointer);
+
+	// Update settings texts
+	sprintf(submenu_option(settings_menu, 3)->text, "Player 1 piece: %c", game_settings->player_1_piece);
+	sprintf(submenu_option(settings_menu, 4)->text, "Player 2 piece: %c", game_settings->player_2_piece);
 }
 
 // Change board width

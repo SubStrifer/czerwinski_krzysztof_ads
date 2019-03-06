@@ -44,6 +44,32 @@ int get_nav_key()
 	return -1;
 }
 
+// Returns key code for alphanumeric characters, KEY_ENTER, KEY_ESC, KEY_SPACE, KEY_BACKSPACE or -1 for any other character
+int get_an_key()
+{
+	int key = getch();
+	// Returning -1 in the case of arrows
+	if (key == KEY_ARROW)
+		return -1;
+	// Returning enter
+	if (key == KEY_ENTER)
+		return KEY_ENTER;
+	// Returning escape
+	if (key == KEY_ESC)
+		return KEY_ESC;
+	// Returning space
+	if (key == KEY_SPACE)
+		return KEY_SPACE;
+	// Returning backspace
+	if (key == KEY_BACKSPACE)
+		return KEY_BACKSPACE;
+	// Returning alphanumeric character
+	if ((key >= 48 && key <= 57) || (key >= 65 && key <= 90) || (key >= 97 && key <= 122))
+		return key;
+	// Returning -1 for everything else	
+	return -1;
+}
+
 // Testing - displaying key codes until Escape is pressed
 void display_key_codes()
 {

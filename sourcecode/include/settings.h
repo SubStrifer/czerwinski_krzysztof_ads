@@ -5,9 +5,9 @@ typedef struct
 {
     int board_width;
     int board_height;
-    char player_1_name[20];
+    char player_1_name[21];
     char player_1_piece;
-    char player_2_name[20];
+    char player_2_name[21];
     char player_2_piece;
     int replay_last;
     bool undo_redo;
