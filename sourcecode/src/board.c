@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include "..\include\board.h"
 #include "..\include\input.h"
 #include "..\include\ai.h"
@@ -10,6 +11,7 @@ bool board_place_piece(board_t*);
 int board_check_win(board_t*);
 bool board_undo(board_t*);
 bool board_redo(board_t*);
+void board_wait(int);
 
 // Allocates and returns a new board
 board_t* board_new(int width, int height, int win_cond)
@@ -227,15 +229,22 @@ void board_replay(board_t* board)
 	menu_print_2(" ", board->current_player->name, false);
 	menu_print(" Z/X or Left/Right Arrow", false);
 	menu_print(" to navigate the replay.", false);
+	menu_print(" Enter to replay automatically.", false);
 	menu_divider();
 	int nav_key = -1;
+	bool auto_replay = false;
 	// Handling gameplay unless escape key is pressed
 	while (nav_key != KEY_ESC)
 	{
-		nav_key = get_nav_key();
+		if (!auto_replay)
+			nav_key = get_nav_key();
 		// Handling navigation
 		switch (nav_key)
 		{
+		case KEY_ENTER:
+			
+			auto_replay = true;
+			break;
 		case KEY_LEFT:
 			board_undo(board);
 			break;
@@ -283,6 +292,14 @@ void board_replay(board_t* board)
 		// Drawing board information
 		menu_print(" It's now turn of:", false);
 		menu_print_2(" ", board->current_player->name, false);
+
+		if(auto_replay)
+		{
+			menu_divider();
+			board_wait(game_settings->auto_interval);
+			board_redo(board);
+			continue;
+		}
 		menu_print(" Z/X or Left/Right Arrow", false);
 		menu_print(" to navigate the replay.", false);
 		if(board->redo->count == 0)
@@ -293,6 +310,12 @@ void board_replay(board_t* board)
 		}
 		menu_divider();
 	}
+}
+
+void board_wait(int secs)
+{
+	unsigned int t = time(0) + secs;
+    while (time(0) < t); 
 }
 
 // Tries to move a board by specific coords

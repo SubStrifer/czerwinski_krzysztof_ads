@@ -4,7 +4,7 @@
 #include "..\include\game.h"
 #include "..\include\file.h"
 
-const char* GAME_VERSION = "0.14";
+const char* GAME_VERSION = "0.15";
 const int GAME_WIDTH = 40;
 
 board_t* game_board;

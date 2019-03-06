@@ -10,8 +10,9 @@ typedef struct
     char player_2_name[21];
     char player_2_piece;
     int replay_last;
-    bool undo_redo;
+    bool undo_redo;// Enable/Disable undo and redo
     bool draw_weights;
+    int auto_interval;// Interval for automatic replays in seconds
 
 } settings_t;
 

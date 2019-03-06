@@ -17,6 +17,7 @@ settings_t* settings_new()
     settings->replay_last = -1;
     settings->undo_redo = true;
     settings->draw_weights = false;
+    settings->auto_interval = 1;
 
     return settings;
 }
