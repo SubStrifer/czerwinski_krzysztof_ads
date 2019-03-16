@@ -28,7 +28,8 @@ make_exe : $(EXE)
 
 # Open created executable
 run_exe :
-	@if exist $(BIN_DIR)\$(EXE) $(BIN_DIR)\$(EXE)
+	@cd $(BIN_DIR)
+	@if exist $(EXE) $(EXE)
 
 # Compile each .c file to its respective .obj file
 {$(SRC_DIR)}.c{$(OBJ_DIR)}.obj :
@@ -47,5 +48,4 @@ create_dirs :
 clean :
 	@if exist $(BIN_DIR)\$(EXE) del $(BIN_DIR)\$(EXE)
 	@if exist $(OBJ_DIR)\*.obj del $(OBJ_DIR)\*.obj
-	@if exist *.replay del *.replay
 	@if exist $(BIN_DIR)\*.replay del $(BIN_DIR)\*.replay
