@@ -79,7 +79,7 @@ void fun_replays(char* args)
 	submenu_add(replays_menu, option_new("Back", "Go back to main menu"));
 
 	// Loading available replays
-	list_2_t* replays_list = replay_list(game_settings->replay_last);
+	list_t* replays_list = replay_list(game_settings->replay_last);
 
 	char* string = (char*)malloc(sizeof(char) * 20);
 	char* text = (char*)malloc(sizeof(char) * 32);
@@ -87,7 +87,7 @@ void fun_replays(char* args)
 	// Adding options to menu
 	for(int i = 0; i < replays_list->count; i++)
 	{
-		int number = list_2_vector(replays_list, i)->x;
+		int number = list_vector(replays_list, i)->value;
 		sprintf(string, "%d", number);
 		sprintf(text, "Replay %d", number);
 		menu_option(replays_menu, text, "Replay selected game", fun_replay, string);
@@ -98,7 +98,7 @@ void fun_replays(char* args)
 
 	menu_draw(replays_menu);
 
-	list_2_free(replays_list);
+	list_free(replays_list);
 	submenu_free(replays_menu);
 }
 

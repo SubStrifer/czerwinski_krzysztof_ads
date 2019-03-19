@@ -18,3 +18,20 @@ void vector_2_free(vector_2_t* vector_2)
 {
     free(vector_2);
 }
+
+// Allocates and returns a new vector
+vector_t* vector_new(int value)
+{
+    vector_t* vector = (vector_t*)malloc(sizeof(vector_t));
+    vector->value = value;
+    vector->prev = NULL;
+    vector->next = NULL;
+
+    return vector;
+}
+
+// Removes a vector from memory
+void vector_free(vector_t* vector)
+{
+    free(vector);
+}

@@ -25,4 +25,3 @@ void board_draw(board_t*, bool);
 void board_play(board_t*);
 void board_replay(board_t*);
 void board_move_pointer(board_t*, int, int);
-

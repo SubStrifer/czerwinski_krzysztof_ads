@@ -128,9 +128,9 @@ board_t* replay_load(char* file)
 }
 
 // Returns a list with all available replay numbers
-list_2_t* replay_list(int last_number)
+list_t* replay_list(int last_number)
 {
-    list_2_t* list = list_2_new();
+    list_t* list = list_new();
 
     int number = -1;
     char* file = (char*)malloc(sizeof(char) * 32);
@@ -143,8 +143,7 @@ list_2_t* replay_list(int last_number)
         sprintf(file, "%d", number);
         strcat(file, ".replay\0");
         if(file_exists(file))
-            list_2_add(list, vector_2_new(number, 0));
-            //todo could use vector_t with one int value
+            list_add(list, vector_new(number));
     }
 
     free(file);
