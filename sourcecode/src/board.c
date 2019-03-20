@@ -242,7 +242,6 @@ void board_replay(board_t* board)
 		switch (nav_key)
 		{
 		case KEY_ENTER:
-			
 			auto_replay = true;
 			break;
 		case KEY_LEFT:
@@ -293,7 +292,7 @@ void board_replay(board_t* board)
 		menu_print(" It's now turn of:", false);
 		menu_print_2(" ", board->current_player->name, false);
 
-		if(auto_replay)
+		if(auto_replay && board->redo->count > 0)
 		{
 			menu_divider();
 			board_wait(game_settings->auto_interval);
@@ -302,11 +301,13 @@ void board_replay(board_t* board)
 		}
 		menu_print(" Z/X or Left/Right Arrow", false);
 		menu_print(" to navigate the replay.", false);
+		menu_print(" Enter to replay automatically.", false);
 		if(board->redo->count == 0)
 		{
 			menu_divider();
 			menu_print(" That was the last move in this game.", false);
 			menu_print(" Press Esc to exit replaying.", false);
+			auto_replay = false;
 		}
 		menu_divider();
 	}

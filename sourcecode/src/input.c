@@ -50,7 +50,11 @@ int get_an_key()
 	int key = getch();
 	// Returning -1 in the case of arrows
 	if (key == KEY_ARROW)
+	{
+		// Catching arrow code
+		getch();
 		return -1;
+	}
 	// Returning enter
 	if (key == KEY_ENTER)
 		return KEY_ENTER;
